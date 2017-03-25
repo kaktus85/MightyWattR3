@@ -1,0 +1,16 @@
+﻿<Window x:Class="MightyWatt.LogSettings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Logging" Icon="/MightyWatt;component/Resources/mwicon.ico" WindowStyle="ToolWindow" ResizeMode="NoResize" Width="200" Height="110">
+    <Grid>
+        <Label Content="Period:" Height="28" HorizontalAlignment="Left" Margin="6,6,0,0" Name="labelPeriod" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="52,8,0,0" Name="textBoxPeriod" VerticalAlignment="Top" Width="60" Text="1" MaxLength="6" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="118,8,0,0" Name="comboBoxUnit" VerticalAlignment="Top" Width="60" SelectedIndex="0">
+            <ComboBoxItem Content="s" />
+            <ComboBoxItem Content="min" />
+            <ComboBoxItem Content="h" />
+        </ComboBox>
+        <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="52,40,0,0" Name="buttonOK" VerticalAlignment="Top" Width="60" IsDefault="True" Click="buttonOK_Click" />
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="118,40,0,0" Name="buttonCancel" VerticalAlignment="Top" Width="60" IsCancel="True" />
+    </Grid>
+</Window>

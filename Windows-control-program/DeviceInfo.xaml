@@ -1,0 +1,36 @@
+﻿<Window x:Class="MightyWatt.DeviceInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Device Information" Height="400" Width="340" WindowStyle="ToolWindow" ResizeMode="CanMinimize" Icon="/MightyWatt;component/Resources/mwicon.ico">
+    <Grid>
+        <Label Content="Firmware version" Height="28" HorizontalAlignment="Left" Margin="12,12,0,0" Name="label1" VerticalAlignment="Top" />
+        <Label Content="Board revision" Height="28" HorizontalAlignment="Left" Margin="12,40,0,0" Name="label2" VerticalAlignment="Top" />
+        <Label Content="ADC maximum voltage" Height="28" HorizontalAlignment="Left" Margin="12,182,0,0" Name="label4" VerticalAlignment="Top" />
+        <Label Content="DAC maximum voltage" Height="28" HorizontalAlignment="Left" Margin="12,210,0,0" Name="label5" VerticalAlignment="Top" />
+        <Label Content="ADC maximum current" Height="28" HorizontalAlignment="Left" Margin="12,126,0,0" Name="label6" VerticalAlignment="Top" />
+        <Label Content="DAC maximum current" Height="28" HorizontalAlignment="Left" Margin="12,154,0,0" Name="label7" VerticalAlignment="Top" />
+        <Label Content="Maximum power" Height="28" HorizontalAlignment="Left" Margin="12,238,0,0" Name="label8" VerticalAlignment="Top" />
+        <Label Content="Voltmeter input resistance" Height="28" HorizontalAlignment="Left" Margin="12,266,0,0" Name="label9" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,14,0,0" Name="textBoxFirmwareVersion" VerticalAlignment="Top" Width="120" IsReadOnly="True" />
+        <Label Content="A" Height="28" HorizontalAlignment="Left" Margin="272,154,0,0" Name="label11" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Label Content="A" Height="28" HorizontalAlignment="Left" Margin="272,126,0,0" Name="label12" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Label Content="V" Height="28" HorizontalAlignment="Left" Margin="272,182,0,0" Name="label13" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Label Content="V" Height="28" HorizontalAlignment="Left" Margin="272,210,0,0" Name="label14" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Label Content="W" Height="28" HorizontalAlignment="Left" Margin="272,238,0,0" Name="label15" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Label Content="Ω" Height="28" HorizontalAlignment="Left" Margin="272,266,0,0" Name="label10" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,42,0,0" Name="textBoxBoardRevision" VerticalAlignment="Top" Width="120" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,156,0,0" Name="textBoxMaxIdac" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,128,0,0" Name="textBoxMaxIadc" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,184,0,0" Name="textBoxMaxVadc" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,212,0,0" Name="textBoxMaxVdac" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,240,0,0" Name="textBoxMaxPower" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,268,0,0" Name="textBoxDvmInputResistance" VerticalAlignment="Top" Width="90" IsReadOnly="True" />
+        <Button Content="OK" HorizontalAlignment="Left" Margin="232,0,0,10" Name="button1" Width="75" IsCancel="True" IsDefault="False" Height="23" VerticalAlignment="Bottom" />
+        <Label Content="Maximum temperature" Height="28" HorizontalAlignment="Left" Margin="12,294,0,0" Name="label16" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" IsReadOnly="True" Margin="181,296,0,0" Name="textBoxMaximumTemperature" VerticalAlignment="Top" Width="90" />
+        <Label Content="°C" Height="28" HorizontalAlignment="Left" Margin="272,294,0,0" Name="label17" VerticalAlignment="Top" Width="30" HorizontalContentAlignment="Center" />
+        <Separator HorizontalAlignment="Left" Height="13" Margin="12,75,0,0" VerticalAlignment="Top" Width="289"/>
+        <Label Content="Calibration date" Height="28" HorizontalAlignment="Left" Margin="12,98,0,0" x:Name="label6_Copy" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="181,100,0,0" x:Name="textBoxCalibrationDate" VerticalAlignment="Top" Width="120" IsReadOnly="True"/>
+    </Grid>
+</Window>

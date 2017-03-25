@@ -1,0 +1,79 @@
+﻿<Window x:Class="MightyWatt.Statistics"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MightyWatt"
+        mc:Ignorable="d"
+        Title="Integrators and statistics" Height="470" Width="520" MinWidth="520" MaxWidth="520" MinHeight="170" Icon="/MightyWatt;component/Resources/mwicon.ico">
+    <Grid>
+        <GroupBox x:Name="groupBoxIntegrators" Header="Integrators" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="115" Width="340">
+            <Grid Margin="0,0,0,0">
+                <Label x:Name="labelCharge" Content="Charge" HorizontalAlignment="Left" Margin="6,7,0,0" VerticalAlignment="Top"/>
+                <Label x:Name="labelEnergy" Content="Dissipated energy" HorizontalAlignment="Left" Margin="6,34,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxCharge" HorizontalAlignment="Left" Height="23" Margin="115,9,0,0" TextWrapping="Wrap" Text="{Binding Charge, Mode=OneWay}" VerticalAlignment="Top" Width="100"/>
+                <ComboBox x:Name="comboBoxChargeUnit" HorizontalAlignment="Left" Margin="220,9,-2,0" VerticalAlignment="Top" Width="100" SelectedIndex="0" SelectionChanged="comboBoxChargeUnit_SelectionChanged" Height="23">
+                    <ComboBoxItem Content="C"/>
+                    <ComboBoxItem Content="Ah"/>
+                </ComboBox>
+                <TextBox x:Name="textBoxEnergy" HorizontalAlignment="Left" Height="23" Margin="115,36,0,0" TextWrapping="Wrap" Text="{Binding Energy, Mode=OneWay}" VerticalAlignment="Top" Width="100"/>
+                <ComboBox x:Name="comboBoxEnergyUnit" HorizontalAlignment="Left" Margin="220,36,-2,0" VerticalAlignment="Top" Width="100" SelectedIndex="0" SelectionChanged="comboBoxEnergyUnit_SelectionChanged" Height="23">
+                    <ComboBoxItem Content="J"/>
+                    <ComboBoxItem Content="Wh"/>
+                </ComboBox>
+                <Label x:Name="labelTime" Content="Time" HorizontalAlignment="Left" Margin="6,61,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxTime" HorizontalAlignment="Left" Height="23" Margin="115,63,0,0" TextWrapping="Wrap" Text="{Binding Time, Mode=OneWay}" VerticalAlignment="Top" Width="100"/>
+                <ComboBox x:Name="comboBoxTimeUnit" HorizontalAlignment="Left" Margin="220,63,-2,0" VerticalAlignment="Top" Width="100" SelectedIndex="0" SelectionChanged="comboBoxTimeUnit_SelectionChanged" Height="23">
+                    <ComboBoxItem Content="s"/>
+                    <ComboBoxItem Content="hh:mm:ss.sss"/>
+                </ComboBox>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBoxAverages" Header="Statistics" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Height="160" Width="485">
+            <Grid Margin="0,0,0,0">
+                <Label x:Name="labelVoltage" Content="Voltage [V]" HorizontalAlignment="Left" Margin="6,56,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxVoltage" HorizontalAlignment="Left" Height="23" Margin="105,58,0,0" TextWrapping="Wrap" Text="{Binding VoltageAverage, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <Label x:Name="labelCurrent" Content="Current [A]" HorizontalAlignment="Left" Margin="6,30,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxCurrent" HorizontalAlignment="Left" Height="23" Margin="105,32,0,0" TextWrapping="Wrap" Text="{Binding CurrentAverage, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <Label x:Name="labelPower" Content="Power [W]" HorizontalAlignment="Left" Margin="6,82,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxPower" HorizontalAlignment="Left" Height="23" Margin="105,84,0,0" TextWrapping="Wrap" Text="{Binding PowerAverage, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <Label x:Name="labelResistance" Content="Resistance [Ω]" HorizontalAlignment="Left" Margin="6,108,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxResistance" HorizontalAlignment="Left" Height="23" Margin="105,110,0,0" TextWrapping="Wrap" Text="{Binding ResistanceAverage, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxCurrentSD" HorizontalAlignment="Left" Height="23" Margin="195,32,0,0" TextWrapping="Wrap" Text="{Binding CurrentSD, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <Label x:Name="labelMinimum" Content="Minimum" HorizontalAlignment="Left" Margin="290,5,0,0" VerticalAlignment="Top"/>
+                <Label x:Name="labelMaximum" Content="Maximum" HorizontalAlignment="Left" Margin="380,5,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="textBoxCurrentMinimum" HorizontalAlignment="Left" Height="23" Margin="285,32,0,0" TextWrapping="Wrap" Text="{Binding CurrentMin, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxCurrentMaximum" HorizontalAlignment="Left" Height="23" Margin="375,32,0,0" TextWrapping="Wrap" Text="{Binding CurrentMax, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxVoltageSD" HorizontalAlignment="Left" Height="23" Margin="195,58,0,0" TextWrapping="Wrap" Text="{Binding VoltageSD, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxVoltageMinimum" HorizontalAlignment="Left" Height="23" Margin="285,58,0,0" TextWrapping="Wrap" Text="{Binding VoltageMin, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxVoltageMaximum" HorizontalAlignment="Left" Height="23" Margin="375,58,0,0" TextWrapping="Wrap" Text="{Binding VoltageMax, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxPowerSD" HorizontalAlignment="Left" Height="23" Margin="195,84,0,0" TextWrapping="Wrap" Text="{Binding PowerSD, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxPowerMinimum" HorizontalAlignment="Left" Height="23" Margin="285,84,0,0" TextWrapping="Wrap" Text="{Binding PowerMin, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxPowerMaximum" HorizontalAlignment="Left" Height="23" Margin="375,84,0,0" TextWrapping="Wrap" Text="{Binding PowerMax, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxResistanceSD" HorizontalAlignment="Left" Height="23" Margin="195,110,0,0" TextWrapping="Wrap" Text="{Binding ResistanceSD, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxResistanceMinimum" HorizontalAlignment="Left" Height="23" Margin="285,110,0,0" TextWrapping="Wrap" Text="{Binding ResistanceMin, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <TextBox x:Name="textBoxResistanceMaximum" HorizontalAlignment="Left" Height="23" Margin="375,110,0,0" TextWrapping="Wrap" Text="{Binding ResistanceMax, Mode=OneWay}" VerticalAlignment="Top" Width="85"/>
+                <ComboBox x:Name="comboBoxSD" HorizontalAlignment="Left" Margin="195,7,0,0" VerticalAlignment="Top" Width="85" SelectedIndex="0" Height="23" SelectionChanged="comboBoxSD_SelectionChanged">
+                    <ComboBoxItem Content="SD" ToolTip="Standard deviation"/>
+                    <ComboBoxItem Content="RSD" ToolTip="Relative standard deviation"/>
+                </ComboBox>
+                <Label x:Name="labelAverage" Content="Average" HorizontalAlignment="Left" Margin="110,5,0,0" VerticalAlignment="Top"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBoxLog" Header="Log" HorizontalAlignment="Left" Margin="10,295,0,12" Width="485">
+            <Grid Margin="0,0,0,0">
+                <Button x:Name="buttonLog" Content="Log snapshot" HorizontalAlignment="Left" Margin="367,10,0,0" VerticalAlignment="Top" Width="90" IsEnabled="{Binding LogFileAvailable, Mode=OneWay}" Click="buttonLog_Click"/>
+                <CheckBox x:Name="checkBoxOffset" Content="Offset log" HorizontalAlignment="Left" Margin="275,13,0,0" VerticalAlignment="Top" ToolTip="Log outside data columns" IsChecked="{Binding OffsetLog, Mode=TwoWay}"/>
+                <TextBox x:Name="textBoxUserNote" HorizontalAlignment="Left" Margin="10,35,0,10" TextWrapping="Wrap" Width="453"/>
+                <Label x:Name="labelUserNote" Content="User note (optional)" HorizontalAlignment="Left" Margin="6,7,0,0" VerticalAlignment="Top"/>
+                <Label x:Name="labelLogged" Content="Log saved…" HorizontalAlignment="Left" Margin="160,7,0,0" VerticalAlignment="Top" Foreground="#FF1D59A2" Visibility="{Binding LogSavedNotification, Mode=OneWay}"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBoxControl" Header="Control" HorizontalAlignment="Left" Margin="355,10,0,0" VerticalAlignment="Top" Height="115" Width="140">
+            <Grid Margin="0,0,0,0">
+                <Button x:Name="buttonReset" Content="Reset" Margin="10,55,8,0" VerticalAlignment="Top" Click="buttonReset_Click" Height="30"/>
+                <Button x:Name="buttonStartStop" Content="{Binding StartStop, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,9,8,0" VerticalAlignment="Top" Click="buttonStartStop_Click" Height="30"/>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>
