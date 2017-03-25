@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Dokumenty\Elektronika\MightyWattR3\Software\Main\Master\obj\x86\Debug\
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\
 MightyWatt
 none
 false
 DEBUG;TRACE
-C:\Dokumenty\Elektronika\MightyWattR3\Software\Main\Master\App.xaml
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\App.xaml
 6-1802172527
 
 251964768113
 151985928649
 About.xaml;DeviceInfo.xaml;LogSettings.xaml;MainWindow.xaml;SeriesResistance.xaml;Tools\Statistics.xaml;
 
-False
+True
 

@@ -91,7 +91,7 @@ namespace MightyWatt
         // opens resource page with newest software, application notes etc.
         public static void OpenResourcesInBrowser()
         {
-            System.Diagnostics.Process.Start("http://kaktuscircuits.blogspot.cz/2015/03/mightywatt-resource-page.html");
+            System.Diagnostics.Process.Start("http://kaktuscircuits.blogspot.cz/2017/03/mightywatt-r3-resource-page.html");
         }
 
         // bindings for various GUI elements
