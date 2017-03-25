@@ -64,9 +64,6 @@ void MightyWatt_Do(void)
   Thermometer_Do();
   Measurement_Do();
   Control_Do();
-//  CurrentSetter_Do();
-//  VoltageSetter_Do();
-  RangeSwitcher_Do();
   LEDController_Do();
   FanController_Do();
   Limiter_Do();

@@ -16,6 +16,7 @@
 #include "Communication.h"
 #include "DACC.h"
 #include "RangeSwitcher.h"
+#include "Control.h"
 
 /* </Includes> */ 
 
@@ -85,13 +86,15 @@ void Voltmeter_Do(void)
 
 void Voltmeter_ProcessADC(void)
 {
+  RangeSwitcher_VoltageRanges range = RangeSwitcher_GetVoltageRange();
+  
   if (adcCounter != ADCRaw->counter) /* Process only new reading from ADC */
   {  
     adcCounter = ADCRaw->counter;
     int32_t signedVoltage, signedUnfilteredVoltage;
 
     /* Finite state machine for hardware autoranging */
-    switch (RangeSwitcher_GetVoltageRange())
+    switch (range)
     {
       case VoltageRange_HighVoltage:               
         if (adcErrorCounter != ADCError->errorCounter) /* Positive voltage overload is taken from ADC error message */
@@ -113,9 +116,9 @@ void Voltmeter_ProcessADC(void)
         if (adcErrorCounter != ADCError->errorCounter)
         {
           adcErrorCounter = ADCError->errorCounter; 
-          if (ADCError->error == ErrorMessaging_ADC_Overload)
+          if ((ADCError->error == ErrorMessaging_ADC_Overload) && (Control_GetCCCV() != Control_CCCV_CV))
           {   
-            RangeSwitcher_VoltageRangeUp();
+            RangeSwitcher_SetVoltageRange(VoltageRange_HighVoltage);
             return;
           }      
         }
@@ -150,6 +153,20 @@ void Voltmeter_ProcessADC(void)
     else
     {
       voltage.unfilteredValue = (uint32_t)signedUnfilteredVoltage;
+    }
+
+    /* Calculate range if not in CV mode */
+    if (Control_GetCCCV() != Control_CCCV_CV)
+    {  
+      if (voltage.unfilteredValue > VOLTMETER_HYSTERESIS_UP)
+      {
+        range = VoltageRange_HighVoltage;
+      }
+      else if (voltage.unfilteredValue < VOLTMETER_HYSTERESIS_DOWN)
+      {
+        range = VoltageRange_LowVoltage;
+      }
+      RangeSwitcher_SetVoltageRange(range);
     }
     
     voltage.counter++;

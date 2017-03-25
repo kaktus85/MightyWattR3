@@ -26,6 +26,10 @@
 
 #define AMMETER_MAXIMUM_CURRENT               (AMMETER_SLOPE_HI + AMMETER_OFFSET_HI) /* Ammeter standard range */
 #define AMMETER_MINIMUM_CURRENT               (-100000) /* Negative current */
+
+#define AMMETER_HYSTERESIS_UP                 (AMMETER_SLOPE_LO * 24 / 25 + AMMETER_OFFSET_LO) /* if over 96 %, go up */
+#define AMMETER_HYSTERESIS_DOWN               (AMMETER_SLOPE_LO * 9 / 10 + AMMETER_OFFSET_LO) /* if below 90 %, go down */
+
  
 /* </Defines> */ 
 

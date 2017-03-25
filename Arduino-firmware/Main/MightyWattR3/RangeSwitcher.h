@@ -20,22 +20,10 @@
 
 /* <Defines> */ 
 
-#define FORCE_RANGE_SWITCH_TIMEOUT            500 /* After forced range switch, the range can go down after this amount of milliseconds */
-
 #define CURRENT_GAIN_PIN                      4
 #define VOLTAGE_GAIN_PIN                      9
 #define CURRENT_DEFAULT_HARDWARE_RANGE        CurrentRange_LowCurrent
 #define VOLTAGE_DEFAULT_HARDWARE_RANGE        VoltageRange_HighVoltage
-
-#define AMMETER_HYSTERESIS_UP                 (AMMETER_SLOPE_LO * 24 / 25 + AMMETER_OFFSET_LO) /* if over 96 %, go up */
-#define AMMETER_HYSTERESIS_DOWN               (AMMETER_SLOPE_LO * 9 / 10 + AMMETER_OFFSET_LO) /* if below 90 %, go down */
-#define CURRENTSETTER_HYSTERESIS_UP           (CURRENTSETTER_SLOPE_LO * 24 / 25 - CURRENTSETTER_OFFSET_LO) /* if over 96 %, go up */
-#define CURRENTSETTER_HYSTERESIS_DOWN         (CURRENTSETTER_SLOPE_LO * 9 / 10 - CURRENTSETTER_OFFSET_LO) /* if below 90 %, go down */
-
-#define VOLTMETER_HYSTERESIS_UP               (VOLTMETER_SLOPE_LO * 24 / 25 + VOLTMETER_OFFSET_LO) /* if over 96 %, go up */
-#define VOLTMETER_HYSTERESIS_DOWN             (VOLTMETER_SLOPE_LO * 9 / 10 + VOLTMETER_OFFSET_LO) /* if below 90 %, go down */
-#define VOLTAGESETTER_HYSTERESIS_UP           (VOLTSETTER_SLOPE_LO * 24 / 25 - VOLTSETTER_OFFSET_LO) /* if over 96 %, go up */
-#define VOLTAGESETTER_HYSTERESIS_DOWN         (VOLTSETTER_SLOPE_LO * 9 / 10 - VOLTSETTER_OFFSET_LO) /* if below 90 %, go down */
 
 /* </Defines> */ 
 
@@ -71,10 +59,18 @@ enum RangeSwitcher_VoltageRanges
 void RangeSwitcher_Init(void);
 
 /**
- * Call periodically
- * Manages hardware ranges (autoranging)
+ * Sets requested current range
+ * 
+ * @param range - Current range to set
  */
-void RangeSwitcher_Do(void);
+void RangeSwitcher_SetCurrentRange(RangeSwitcher_CurrentRanges range);
+
+/**
+ * Sets requested voltage range
+ * 
+ * @param range - Voltage range to set
+ */
+void RangeSwitcher_SetVoltageRange(RangeSwitcher_VoltageRanges range);
 
 /**
  * Gets the hardware range of the ammeter / current setter
@@ -84,21 +80,11 @@ void RangeSwitcher_Do(void);
 RangeSwitcher_CurrentRanges RangeSwitcher_GetCurrentRange(void);
 
 /**
- * Immediately increases the range of the ammeter / current setter
- */
-void RangeSwitcher_CurrentRangeUp(void);
-
-/**
  * Gets the hardware range of the voltmeter / voltage setter
  *
  * @return - the voltage range setting
  */
 RangeSwitcher_VoltageRanges RangeSwitcher_GetVoltageRange(void);
-
-/**
- * Immediately increases the range of the voltmeter / voltage setter
- */
-void RangeSwitcher_VoltageRangeUp(void);
 
 /* </Declarations (prototypes)> */ 
 

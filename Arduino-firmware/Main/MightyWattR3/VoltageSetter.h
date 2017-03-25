@@ -20,7 +20,9 @@
 
 #define VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE               (VOLTSETTER_SLOPE_HI - VOLTSETTER_OFFSET_HI)
 #define VOLTAGE_SETTER_MAXIMUM_LOVOLTAGE               (VOLTSETTER_SLOPE_LO - VOLTSETTER_OFFSET_LO)
-//#define VOLTAGE_SETTER_MAXIMUM_STEP                    16384 /* LSB*/
+
+#define VOLTAGESETTER_HYSTERESIS_UP           (VOLTSETTER_SLOPE_LO * 24 / 25 - VOLTSETTER_OFFSET_LO) /* if over 96 %, go up */
+#define VOLTAGESETTER_HYSTERESIS_DOWN         (VOLTSETTER_SLOPE_LO * 9 / 10 - VOLTSETTER_OFFSET_LO) /* if below 90 %, go down */
 
 /* </Defines> */ 
 
@@ -66,43 +68,6 @@ void VoltageSetter_Plus(uint32_t value);
  *                If the final value would be negative, zero voltage will be set
  */
 void VoltageSetter_Minus(uint32_t value);
-
-//
-///**
-// * Sets maximum voltage at present voltmeter range to DAC
-// */
-//void VoltageSetter_SetMaximumVoltage(void);
-//
-///**
-// * Sets percentage of full scale voltage
-// *
-// * @param percentage - Percentage of full-scale range (0-100)
-// */
-//void VoltageSetter_SetPercentOfRange(uint8_t percentage);
-//
-///**
-// * Increases the DAC value by the specified amount of LSBs
-// *
-// * @param value - The addition to the present value
-// *                If the final value exceeds DAC limits, maximum possible voltage will be set
-// */
-//void VoltageSetter_Plus(uint16_t value);
-//
-///**
-// * Decreases the DAC value by the specified amount of LSBs
-// *
-// * @param value - The subtraction from the present value
-// *                If the final value would be negative, zero voltage will be set
-// */
-//void VoltageSetter_Minus(uint16_t value);
-//
-///**
-// * Gets voltage corresponding to given percentage of full scale voltage
-// *
-// * @param percentage - Percentage of full-scale range (0-100)
-// * @return - Voltage corresponding to given percentage of full scale voltage at present voltmeter range setting
-// */
-//uint32_t VoltageSetter_GetPercentOfRange(uint8_t percentage);
 
 /**
  * Returns error structure for this module

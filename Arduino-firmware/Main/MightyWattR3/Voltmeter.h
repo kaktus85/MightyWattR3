@@ -28,8 +28,8 @@
 
 #define VOLTMETER_MAXIMUM_VOLTAGE               (VOLTMETER_SLOPE_HI + VOLTMETER_OFFSET_HI)
 #define VOLTMETER_MINIMUM_VOLTAGE               (-200000) /* Negative voltage */
-//#define VOLTMETER_HYSTERESIS_UP                 (VOLTMETER_SLOPE_LO * 24 / 25 + VOLTMETER_OFFSET_LO) /* if over 96 %, go up */
-//#define VOLTMETER_HYSTERESIS_DOWN               (VOLTMETER_SLOPE_LO * 9 / 10 + VOLTMETER_OFFSET_LO) /* if below 90 %, go down */
+#define VOLTMETER_HYSTERESIS_UP               (VOLTMETER_SLOPE_LO * 24 / 25 + VOLTMETER_OFFSET_LO) /* if over 96 %, go up */
+#define VOLTMETER_HYSTERESIS_DOWN             (VOLTMETER_SLOPE_LO * 9 / 10 + VOLTMETER_OFFSET_LO) /* if below 90 %, go down */
  
 /* </Defines> */ 
 

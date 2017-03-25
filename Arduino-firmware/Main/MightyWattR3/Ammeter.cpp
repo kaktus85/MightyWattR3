@@ -15,6 +15,7 @@
 #include "Configuration.h"
 #include "DACC.h"
 #include "RangeSwitcher.h"
+#include "Control.h"
 
 /* </Includes> */ 
 
@@ -49,13 +50,14 @@ void Ammeter_Init(void)
 
 void Ammeter_Do(void)
 {
-  int32_t signedCurrent, signedUnfilteredCurrent;  
+  int32_t signedCurrent, signedUnfilteredCurrent;    
+  RangeSwitcher_CurrentRanges range = RangeSwitcher_GetCurrentRange();
   
   if (adcCounter != ADCRaw->counter) /* Process only new reading from ADC */
   {      
     adcCounter = ADCRaw->counter;
     /* Finite state machine for hardware autoranging */
-    switch (RangeSwitcher_GetCurrentRange())
+    switch (range)
     {
       case CurrentRange_HighCurrent:        
         if (adcErrorCounter != ADCError->errorCounter) /* Positive current overload is taken from ADC error message */
@@ -76,9 +78,9 @@ void Ammeter_Do(void)
         if (adcErrorCounter != ADCError->errorCounter) /* ADC overload in low current range only switches to high current range, without updating the current value */
         {
           adcErrorCounter = ADCError->errorCounter;
-          if (ADCError->error == ErrorMessaging_ADC_Overload)
+          if ((ADCError->error == ErrorMessaging_ADC_Overload) && (Control_GetCCCV() != Control_CCCV_CC))
           {
-            RangeSwitcher_CurrentRangeUp();
+            RangeSwitcher_SetCurrentRange(CurrentRange_HighCurrent);
             return;
           }          
         }
@@ -114,6 +116,20 @@ void Ammeter_Do(void)
     else
     {
       current.unfilteredValue = (uint32_t)signedUnfilteredCurrent;
+    }
+
+    /* Calculate range if not in CC mode */
+    if (Control_GetCCCV() != Control_CCCV_CC)
+    {  
+      if (current.unfilteredValue > AMMETER_HYSTERESIS_UP)
+      {
+        range = CurrentRange_HighCurrent;
+      }
+      else if (current.unfilteredValue < AMMETER_HYSTERESIS_DOWN)
+      {
+        range = CurrentRange_LowCurrent;
+      }
+      RangeSwitcher_SetCurrentRange(range);
     }
 
     current.counter++;
