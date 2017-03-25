@@ -14,8 +14,8 @@
  * If you are using Arduino Zero (M0/M0 Pro), the sketch was tested with Arduino.org board.
  */
  
-#define ZERO /* Arduino Zero, M0 and M0 Pro (Cortex M0+, 32-bit) via Native port (USB) */
-//#define UNO /* Arduino Uno (UNO, 8-bit) */
+//#define ZERO /* Arduino Zero, M0 and M0 Pro (Cortex M0+, 32-bit) via Native port (USB) */
+#define UNO /* Arduino Uno (UNO, 8-bit) */
 
 
 /* Serial port */
@@ -56,7 +56,7 @@
 #define VOLTMETER_OFFSET_LO 				-238L
 
 
-/* MightyWatt E3 parameters */
+/* MightyWatt R3 parameters */
 
 #define FIRMWARE_VERSION                 	"3.0.0"
 #define BOARD_REVISION                   	"3.1.0"
