@@ -22569,7 +22569,7 @@ I2C, REF out</description>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="X1" library="con-wago-500-modified" deviceset="W237-4" device=""/>
 <part name="R5" library="rcl" deviceset="R-EU_" device="R0603" value="4k7"/>
-<part name="R6" library="rcl" deviceset="R-EU_" device="R0603" value="1k"/>
+<part name="R6" library="rcl" deviceset="R-EU_" device="R0603" value="75R"/>
 <part name="IC8" library="r2.5-3" deviceset="AD5691R" device="AD5691R"/>
 <part name="VREF1" library="supply2" deviceset="+UB" device=""/>
 <part name="VCC14" library="supply1" deviceset="VCCIO" device=""/>
@@ -22590,9 +22590,9 @@ I2C, REF out</description>
 <part name="R7" library="rcl" deviceset="R-EU_" device="R0603" value="4k7"/>
 <part name="IC2" library="kaktus" deviceset="MAX4619EUE" device=""/>
 <part name="GND30" library="supply1" deviceset="GND" device=""/>
-<part name="C2" library="rcl" deviceset="C-EU" device="C0603" value="100n"/>
-<part name="R3" library="rcl" deviceset="R-EU_" device="R0603" value="DNP"/>
-<part name="C1" library="rcl" deviceset="C-EU" device="C1206" value="DNP"/>
+<part name="C2" library="rcl" deviceset="C-EU" device="C0603" value="DNP"/>
+<part name="R3" library="rcl" deviceset="R-EU_" device="R0603" value="0R"/>
+<part name="C1" library="rcl" deviceset="C-EU" device="C1206" value="2u2/16V"/>
 <part name="VCC1" library="supply1" deviceset="VCCIO" device=""/>
 </parts>
 <sheets>
