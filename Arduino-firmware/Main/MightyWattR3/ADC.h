@@ -39,6 +39,11 @@
 #define ADC_I_CHANNEL_FILTER_SIZE    42
 #define ADC_T_CHANNEL_FILTER_SIZE    1
 
+/* ADC cycle skipping */
+#define ADC_V_CHANNEL_SKIP_RATIO     0  /* No ADC cycle skipping */
+#define ADC_I_CHANNEL_SKIP_RATIO     0  /* No ADC cycle skipping */
+#define ADC_T_CHANNEL_SKIP_RATIO     7  /* Measure only ever 2**7 = 128th cycle */
+
 /* </Defines> */ 
 
 

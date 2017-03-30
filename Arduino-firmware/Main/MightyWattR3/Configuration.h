@@ -1,7 +1,7 @@
 /**
  * Configuration.h - Arduino setting and calibration constants
  *
- * 2016-10-21
+ * 2017-03-28
  * kaktus circuits
  * GNU GPL v.3
  */
@@ -14,8 +14,8 @@
  * If you are using Arduino Zero (M0/M0 Pro), the sketch was tested with Arduino.org board.
  */
  
-//#define ZERO /* Arduino Zero, M0 and M0 Pro (Cortex M0+, 32-bit) via Native port (USB) */
-#define UNO /* Arduino Uno (UNO, 8-bit) */
+#define ZERO /* Arduino Zero, M0 and M0 Pro (Cortex M0+, 32-bit) via Native port (USB) */
+//#define UNO /* Arduino Uno (UNO, 8-bit) */
 
 
 /* Serial port */
@@ -58,7 +58,7 @@
 
 /* MightyWatt R3 parameters */
 
-#define FIRMWARE_VERSION                 	"3.0.0"
+#define FIRMWARE_VERSION                 	"3.0.1"
 #define BOARD_REVISION                   	"3.1.0"
 #define VOLTMETER_INPUT_RESISTANCE       	1000000000UL
 #define MAXIMUM_POWER                    	75000000UL

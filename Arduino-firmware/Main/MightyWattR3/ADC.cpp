@@ -20,6 +20,8 @@
 
 static ADS1x15_ChannelSetting ChannelSettings[ADC_CHANNEL_COUNT];
 static bool ChannelIsFiltered[ADC_CHANNEL_COUNT];
+static uint8_t ChannelSkipRatio[ADC_CHANNEL_COUNT];
+static uint16_t ChannelCycleCounter[ADC_CHANNEL_COUNT];
 static uint32_t LastUpdate;
 static TSCADCLong Voltages[ADC_CHANNEL_COUNT];
 static ErrorMessaging_Error ADCError[ADC_CHANNEL_COUNT];
@@ -96,6 +98,14 @@ void ADC_Init(void)
   ChannelIsFiltered[ADC_V] = true;
   ChannelIsFiltered[ADC_I] = true;
   ChannelIsFiltered[ADC_T] = false;
+
+  ChannelSkipRatio[ADC_V] = ADC_V_CHANNEL_SKIP_RATIO;
+  ChannelSkipRatio[ADC_I] = ADC_I_CHANNEL_SKIP_RATIO;
+  ChannelSkipRatio[ADC_T] = ADC_T_CHANNEL_SKIP_RATIO;
+
+  ChannelCycleCounter[ADC_V] = 0;
+  ChannelCycleCounter[ADC_I] = 0;
+  ChannelCycleCounter[ADC_T] = 0;
   
   int16_t i;
   for (i = 0; i < ADC_CHANNEL_COUNT; i++)
@@ -115,9 +125,9 @@ void ADC_Init(void)
 
 void ADC_Do(void) /* Call periodically */
 {
-  static int16_t i = 0;
+  static uint8_t i = 0; /* Channel iterator */
   static bool repeatedConversion = false;
-  static int16_t rawResult;
+  static int16_t rawResult;  
   
   if (ADS1x15_ConversionReady())
   {
@@ -153,11 +163,25 @@ void ADC_Do(void) /* Call periodically */
       ChannelSettings[i].range = ADC_DEFAULT_RANGE;
     }
     LastUpdate = millis();
-    i++;    
-    if (i == ADC_CHANNEL_COUNT) /* Wrap around the number of channels */
-    {
-      i = 0;
-    }
+
+    do
+    {      
+      for (uint8_t j = 0; j < ADC_CHANNEL_COUNT; j++)
+      {
+        i++;
+        if (i == ADC_CHANNEL_COUNT) /* Wrap around the number of channels */
+        {
+          i = 0;      
+        }
+        ChannelCycleCounter[i]++; /* Increase cycle number */
+
+        if ((ChannelCycleCounter[i] & ((1U << ChannelSkipRatio[i]) - 1U)) == 0) /* Try finding the next channel that is not skipped */
+        {
+          break;
+        }
+      }
+    } while ((ChannelCycleCounter[i] & ((1U << ChannelSkipRatio[i])) - 1U) > 0); /* Channel skipping */
+    
     ADS1x15_StartConversion(ChannelSettings[i]); /* Start converting the next channel */    
   }
   

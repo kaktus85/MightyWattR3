@@ -12,12 +12,12 @@
 #if (CYCLE_COUNTER_ENABLE == true)
 #include "Configuration.h"
 #include "Measurement.h"
-static Measurement_Values * measurementValues;
+const static Measurement_Values * measurementValues;
 static uint8_t measurementValues_Counter = 0;
 #endif
 
 void setup() 
-{
+{  
   delay(20); /* delay to give the hardware some time to stabilize */  
   Wire.begin();   
   Watchdog_Init(); /* system watchdog */
@@ -35,23 +35,28 @@ void loop()
   MightyWatt_Do();
 
   #if (CYCLE_COUNTER_ENABLE == true)
-    static uint32_t cycleCounter = 0;
+    static uint32_t measurementCycleCounter = 0;
+    static uint32_t loopCycleCounter = 0;
     static uint32_t lastUpdate = 0;
     uint32_t now = millis();
     static bool toggle = false;
   
     if ((now - lastUpdate) > 10000)
     {         
-      SerialPort.print("Meas cycles/s: ");
-      SerialPort.println((cycleCounter * 1000UL) / (now - lastUpdate));
-      cycleCounter = 0;
-      lastUpdate = now;        
+      SerialPort.print("Meas/s: ");
+      SerialPort.print((measurementCycleCounter * 1000UL) / (now - lastUpdate));
+      SerialPort.print("\tMain loop/s: ");
+      SerialPort.println((loopCycleCounter * 1000UL) / (now - lastUpdate));
+      measurementCycleCounter = 0;
+      loopCycleCounter = 0;
+      lastUpdate = now;     
     }
     if (measurementValues_Counter != measurementValues->counter)
     {
-      cycleCounter++;  
+      measurementCycleCounter++;  
       measurementValues_Counter = measurementValues->counter;
     }    
+    loopCycleCounter++;
   #endif
 }
 
