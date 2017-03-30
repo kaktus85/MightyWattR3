@@ -83,6 +83,11 @@ namespace MightyWatt
         private FanRules _FanRule = DefaultFanRule;
         private MeasurementFilters _MeasurementFilter = DefaultMeasurementFilter;
 
+        // external resistance watchdog
+        public event WatchdogStopDelegate SeriesResistanceWatchdogStop; // event that is raised when series resistance watchdog has stopped the load
+        private double seriesResistancePowerLimit = 100;
+        private DateTime lastSeriesResistancePowerLimitOKTime = DateTime.Now;
+
         public Load()
         {
             this.device = new Communication(); // load over COM port            
@@ -91,6 +96,7 @@ namespace MightyWatt
             device.DataUpdatedEvent += updateGui; // updates 
             device.DataUpdatedEvent += checkError; // errors
             device.DataUpdatedEvent += watchdog; // watchdog
+            device.DataUpdatedEvent += seriesResistanceWatchdog; // series resistance watchdog
             device.DataUpdatedEvent += log; // data logging            
 
             device.ConnectionUpdatedEvent += SetDefault;// LED brightness, LED rules, Fan rules, measurement filter;
@@ -353,7 +359,7 @@ namespace MightyWatt
         // can disable load based on values in the watchdog group box
         private void watchdog()
         {
-            if (this.WatchdogEnabled)
+            if (WatchdogEnabled)
             {
                 double value;
                 if (double.TryParse(this.WatchdogValue, out value))
@@ -364,6 +370,25 @@ namespace MightyWatt
                     }                    
                 }
             }
+        }
+
+        // can disable load based on series resistance power limit
+        private void seriesResistanceWatchdog()
+        {
+            // limiting is enabled and the present power limit of the series resistance is exceeded…
+            if (SeriesResistancePowerLimitIsEnabled && (SeriesResistancePowerLimit < SeriesResistance * Math.Pow(Current, 2)))
+            {
+                // …for more than one second, stop the load
+                if ((DateTime.Now - lastSeriesResistancePowerLimitOKTime).TotalSeconds > 1)
+                {
+                    seriesResistanceWatchdogStop();
+                }
+            }
+            else
+            {
+                // update timer
+                lastSeriesResistancePowerLimitOKTime = DateTime.Now;
+            }            
         }
 
         // compares the current measured quantity to a given value
@@ -407,6 +432,21 @@ namespace MightyWatt
             }
             ImmediateStop(); // immediately stop the load            
             WatchdogStop?.Invoke();
+        }
+
+        // stops the load and raises SeriesResistanceWatchdogStop event
+        private void seriesResistanceWatchdogStop()
+        {
+            if (worker != null)
+            {
+                if (worker.IsBusy)
+                {
+                    cancel = true;
+                    worker.CancelAsync();
+                }
+            }
+            ImmediateStop(); // immediately stop the load            
+            SeriesResistanceWatchdogStop?.Invoke();
         }
 
         // creates a new file for logging
@@ -566,6 +606,23 @@ namespace MightyWatt
                 this.device.SeriesResistance = value;
             }
         }
+
+        public double SeriesResistancePowerLimit
+        {
+            get
+            {
+                return seriesResistancePowerLimit;
+            }
+            set
+            {
+                if (value > 0.1) // minimum 0.1 W of series resistance power handling
+                {
+                    seriesResistancePowerLimit = value;
+                }
+            }
+        }
+
+        public bool SeriesResistancePowerLimitIsEnabled { get; set; }
 
         public bool IsConnected
         {

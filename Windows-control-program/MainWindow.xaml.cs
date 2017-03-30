@@ -24,7 +24,7 @@ namespace MightyWatt
         private delegate void GuiDispatcherDelegate();
         private GuiDispatcherDelegate guiDispatcherDelegate;
         private bool errorShowingEnabled = true;
-        private bool watchdogMessageShowingEnabled = true;
+        private bool watchdogMessageShowingEnabled = true, seriesResistanceWatchdogMessageShowingEnabled = true;
         private string statusBarConnectionString = "Not connected";
         private Statistics statisticsWindow;
 
@@ -65,6 +65,8 @@ namespace MightyWatt
             // watchdog
             load.WatchdogStop += watchdogStop;
             comboBoxWatchdogComparator.SelectedIndex = 1;
+            // series resistance watchdog
+            load.SeriesResistanceWatchdogStop += seriesResistanceWatchdogStop;
 
             // plot
             m1 = new PlotData(100, 1000);
@@ -483,23 +485,31 @@ namespace MightyWatt
             if (watchdogMessageShowingEnabled)
             {
                 watchdogMessageShowingEnabled = false;
-                await showWatchdogMessage();
+                await Task.Run(() =>
+                {
+                    MessageBoxResult result = MessageBox.Show("Watchdog stopped the load.\nDo you want to keep the watchdog on?", "Watchdog", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        load.WatchdogEnabled = true;
+                    }
+                }
+                );
                 watchdogMessageShowingEnabled = true;
             }
         }
 
-        // show watchdog message
-        private Task showWatchdogMessage()
+        // in case of series resistance watchdog action, shows error message
+        private async void seriesResistanceWatchdogStop()
         {
-            return Task.Run(() =>
+            if (seriesResistanceWatchdogMessageShowingEnabled)
             {
-                MessageBoxResult result = MessageBox.Show("Watchdog stopped the load.\nDo you want to keep the watchdog on?", "Watchdog", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                if (result == MessageBoxResult.Yes)
+                seriesResistanceWatchdogMessageShowingEnabled = false;
+                await Task.Run(() =>
                 {
-                    load.WatchdogEnabled = true;
-                }
+                    MessageBox.Show("Series resistance power limit has been exceeded.\nLoad has been stopped.", "Series resistance power limit exceeded", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                });
+                seriesResistanceWatchdogMessageShowingEnabled = true;
             }
-            );
         }
 
         // in case of load reported error shows message

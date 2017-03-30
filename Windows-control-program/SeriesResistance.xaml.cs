@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace MightyWatt
 {
@@ -26,14 +16,18 @@ namespace MightyWatt
             InitializeComponent();
             this.program = program;
             vc = new Converters.ValueConverter();
-            textBoxResistance.Text = (string)(vc.Convert(this.program.SeriesResistance, typeof(string), "f3", System.Globalization.CultureInfo.CurrentCulture));            
+            textBoxResistance.Text = (string)(vc.Convert(this.program.SeriesResistance, typeof(string), "f3", System.Globalization.CultureInfo.CurrentCulture));
+            textBoxPower.Text = (string)(vc.Convert(this.program.SeriesResistancePowerLimit, typeof(string), "f0", System.Globalization.CultureInfo.CurrentCulture));
+            checkBoxPower.IsChecked = program.SeriesResistancePowerLimitIsEnabled;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                this.program.SeriesResistance = (double)(vc.ConvertBack(textBoxResistance.Text, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture));
+                program.SeriesResistance = (double)(vc.ConvertBack(textBoxResistance.Text, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture));
+                program.SeriesResistancePowerLimit = (double)(vc.ConvertBack(textBoxPower.Text, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture));
+                program.SeriesResistancePowerLimitIsEnabled = (checkBoxPower.IsChecked == true);
                 DialogResult = true;
             }
             catch (OverflowException)

@@ -5,12 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MightyWatt"
         mc:Ignorable="d"
-        Title="Series resistance" WindowStyle="ToolWindow" ResizeMode="NoResize" Width="280" Height="200">
+        Title="Series resistance" WindowStyle="ToolWindow" ResizeMode="NoResize" Width="300" Height="300">
     <Grid>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="8,8,0,0" Name="textBoxResistance" VerticalAlignment="Top" Width="60" Text="1" MaxLength="6" />
         <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="110,8,0,0" Name="buttonOK" VerticalAlignment="Top" Width="60" IsDefault="True" Click="buttonOK_Click" RenderTransformOrigin="2,-0.652"/>
         <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="176,8,0,0" Name="buttonCancel" VerticalAlignment="Top" Width="60" IsCancel="True" />
-        <TextBlock x:Name="textBlock" Margin="6,36,10,10" TextWrapping="Wrap" Text="This feature allows specifing a resistance that is connected in series with MightyWatt. It can be cable resistance or deliberately added power resistor. The value is only used to recalculate the allowable power dissipation in remote mode. No visible or logged values are affected. Use this feature with caution." ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-        <Label x:Name="labelUnit" Content="Ω" HorizontalAlignment="Left" Margin="69,4,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="textBlock" Margin="6,66,10,10" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"><Run FontSize="14" FontFamily="Segoe UI" Text="▪"/><Run Text=" "/><Run Text="This feature allows specifing a resistance that is connected in series with MightyWatt. It can be cable resistance or deliberately added power resistor. The value is only used to recalculate the allowable power dissipation in remote mode. No visible or logged values are affected. Use this feature with caution."/><LineBreak/><Run/><LineBreak/><Run FontSize="14" FontFamily="Segoe UI" Text="▪"/><Run Text=" "/><Run Text="For enhanced safety, load can be automatically stopped when a selected power threshold of the "/><Run Text="series resistance "/><Run Text="is exceeded."/></TextBlock>
+        <Label x:Name="labelUnitOhm" Content="Ω" HorizontalAlignment="Left" Margin="69,4,0,0" VerticalAlignment="Top"/>
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="8,38,0,0" x:Name="textBoxPower" VerticalAlignment="Top" Width="60" Text="100" MaxLength="6" />
+        <Label x:Name="labelUnitW" Content="W" HorizontalAlignment="Left" Margin="69,34,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkBoxPower" Content="Stop load when exceeded" HorizontalAlignment="Left" Margin="110,40,0,0" VerticalAlignment="Top" Height="21" Width="174"/>
     </Grid>
 </Window>
