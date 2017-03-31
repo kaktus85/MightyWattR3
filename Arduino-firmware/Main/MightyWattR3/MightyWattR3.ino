@@ -89,8 +89,10 @@ static void Watchdog_Init(void)
 static void Watchdog_Reset(void)
 {
   #ifdef ZERO
-    WDT->CLEAR.reg = WDT_CLEAR_CLEAR_KEY;	
-    while(WDT->STATUS.bit.SYNCBUSY){} /* wait for sync */
+    if(WDT->STATUS.bit.SYNCBUSY == false) /* Reset only when the previous reset was already synchronized */
+    {
+      WDT->CLEAR.reg = WDT_CLEAR_CLEAR_KEY;    
+    }  
   #elif defined(UNO)
     asm("WDR");
   #endif 

@@ -1,7 +1,7 @@
 /**
  * Configuration.h - Arduino setting and calibration constants
  *
- * 2017-03-28
+ * 2017-03-31
  * kaktus circuits
  * GNU GPL v.3
  */
@@ -58,7 +58,7 @@
 
 /* MightyWatt R3 parameters */
 
-#define FIRMWARE_VERSION                 	"3.0.1"
+#define FIRMWARE_VERSION                 	"3.0.2"
 #define BOARD_REVISION                   	"3.1.0"
 #define VOLTMETER_INPUT_RESISTANCE       	1000000000UL
 #define MAXIMUM_POWER                    	75000000UL
