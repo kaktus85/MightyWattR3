@@ -80,16 +80,24 @@ void CurrentSetter_Do(void)
     dac = 0;
   }
 
+  /* Set range if low current */
+  if (range == CurrentRange_LowCurrent)
+  {
+    RangeSwitcher_SetCurrentRange(range);
+  }
   /* Set calculated DAC value */
   if (!DACC_SetVoltage(dac & 0xFFFF))
   {
     CurrentSetterError.errorCounter++;
     CurrentSetterError.error = ErrorMessaging_CurrentSetter_SetCurrentOverload; 
   }
+  /* Set range if high current */
+  if (range == CurrentRange_HighCurrent)
+  {
+    RangeSwitcher_SetCurrentRange(range);
+  }  
   /* Set phase CC */
   Control_SetCCCV(Control_CCCV_CC);
-  /* Set range */
-  RangeSwitcher_SetCurrentRange(range);
 }
 
 void CurrentSetter_SetCurrent(uint32_t current)

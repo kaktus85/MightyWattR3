@@ -73,16 +73,24 @@ void VoltageSetter_Do(void)
     return;
   }
 
-  /* Set range */
-  RangeSwitcher_SetVoltageRange(range);
-  /* Set phase CV */
-  Control_SetCCCV(Control_CCCV_CV);
+  /* Set range if high voltage */
+  if (range == VoltageRange_HighVoltage)
+  {
+    RangeSwitcher_SetVoltageRange(range);
+  }
   /* Set calculated DAC value */
   if (!DACC_SetVoltage(dac & 0xFFFF))
   {
     VoltageSetterError.errorCounter++;
     VoltageSetterError.error = ErrorMessaging_VoltageSetter_SetVoltageOverload; 
   }  
+  /* Set range if low voltage */
+  if (range == VoltageRange_LowVoltage)
+  {
+    RangeSwitcher_SetVoltageRange(range);
+  }
+  /* Set phase CV */
+  Control_SetCCCV(Control_CCCV_CV);
 }
 
 void VoltageSetter_SetVoltage(uint32_t voltage)
