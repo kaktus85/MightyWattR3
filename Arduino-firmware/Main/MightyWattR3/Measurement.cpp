@@ -27,6 +27,7 @@ static uint8_t voltageCounter, currentCounter, voltageErrorCounter, currentError
 static Measurement_Values measurementValues;
 static ErrorMessaging_Error MeasurementError;
 static uint8_t commandCounter;
+static bool invalidated; /* Indicates that the next measurement will be considered invalid */
 
 #ifdef ADC_TYPE_ADS1015
 const ADC_RateRangingFilter MeasurementFast = {ADS1015_920SPS, false, false};
@@ -76,6 +77,8 @@ void Measurement_Init(void)
   
   writeCommand = Communication_GetWriteCommand();
   commandCounter = writeCommand->commandCounter;
+
+  invalidated = false;
 }
 
 void Measurement_Do(void)
@@ -103,64 +106,70 @@ void Measurement_Do(void)
     commandCounter = writeCommand->commandCounter;
   }
 
-
   if ((voltageCounter != voltage->counter) && (currentCounter != current->counter)) /* Calculate values when both voltage and current are updated */
   {       
-    uint64_t resistance, unfilteredResistance = 0;
-    measurementValues.voltage = voltage->value;
-    measurementValues.current = current->value;
-    measurementValues.power = (uint32_t)((((uint64_t)measurementValues.voltage) * ((uint64_t)measurementValues.current)) / 1000000ULL);
-    measurementValues.unfilteredVoltage = voltage->unfilteredValue;
-    measurementValues.unfilteredCurrent = current->unfilteredValue;
-    measurementValues.unfilteredPower = (uint32_t)((((uint64_t)measurementValues.unfilteredVoltage) * ((uint64_t)measurementValues.unfilteredCurrent)) / 1000000ULL);
-    if (measurementValues.current == 0) /* Zero current implies maximum input resistance, which is determined by voltmeter input resistance */
-    {
-      resistance = VOLTMETER_INPUT_RESISTANCE;
-    }
-    else
-    {
-      resistance = (((((uint64_t)measurementValues.voltage) << 22) * 1000) / ((uint64_t)measurementValues.current)) >> 22;
-      if (resistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
-      {
-        resistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
-      }
-      if (resistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
-      {
-        resistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
-      }
-    }
-    measurementValues.resistance = (uint32_t)resistance;
-
-    if (measurementValues.unfilteredCurrent == 0) /* Zero current implies maximum input resistance, which is determined by voltmeter input resistance */
-    {
-      unfilteredResistance = VOLTMETER_INPUT_RESISTANCE;
-    }
-    else
-    {
-      unfilteredResistance = (((((uint64_t)measurementValues.unfilteredVoltage) << 22) * 1000) / ((uint64_t)measurementValues.unfilteredCurrent)) >> 22;
-      if (unfilteredResistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
-      {
-        unfilteredResistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
-      }
-      if (unfilteredResistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
-      {
-        unfilteredResistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
-      }
-    }
-    measurementValues.unfilteredResistance = (uint32_t)unfilteredResistance;
-        
-    measurementValues.counter++;
-    measurementValues.milliseconds = millis();
     voltageCounter = voltage->counter;
     currentCounter = current->counter;
     
-    if ((currentErrorCounter != AmmeterError->errorCounter) || (voltageErrorCounter != VoltmeterError->errorCounter))
+    if (invalidated)
     {
-      /* Measurement invalid */
-      MeasurementError.error = ErrorMessaging_Measurement_Invalid;
-      MeasurementError.errorCounter++;
-      currentErrorCounter = AmmeterError->errorCounter;
-      voltageErrorCounter = VoltmeterError->errorCounter;
+      invalidated = false;
+    }
+    else
+    {    
+      uint64_t resistance, unfilteredResistance = 0;
+      measurementValues.voltage = voltage->value;
+      measurementValues.current = current->value;
+      measurementValues.power = (uint32_t)((((uint64_t)measurementValues.voltage) * ((uint64_t)measurementValues.current)) / 1000000ULL);
+      measurementValues.unfilteredVoltage = voltage->unfilteredValue;
+      measurementValues.unfilteredCurrent = current->unfilteredValue;
+      measurementValues.unfilteredPower = (uint32_t)((((uint64_t)measurementValues.unfilteredVoltage) * ((uint64_t)measurementValues.unfilteredCurrent)) / 1000000ULL);
+      if (measurementValues.current == 0) /* Zero current implies maximum input resistance, which is determined by voltmeter input resistance */
+      {
+        resistance = VOLTMETER_INPUT_RESISTANCE;
+      }
+      else
+      {
+        resistance = (((((uint64_t)measurementValues.voltage) << 22) * 1000) / ((uint64_t)measurementValues.current)) >> 22;
+        if (resistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
+        {
+          resistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
+        }
+        if (resistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
+        {
+          resistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
+        }
+      }
+      measurementValues.resistance = (uint32_t)resistance;
+  
+      if (measurementValues.unfilteredCurrent == 0) /* Zero current implies maximum input resistance, which is determined by voltmeter input resistance */
+      {
+        unfilteredResistance = VOLTMETER_INPUT_RESISTANCE;
+      }
+      else
+      {
+        unfilteredResistance = (((((uint64_t)measurementValues.unfilteredVoltage) << 22) * 1000) / ((uint64_t)measurementValues.unfilteredCurrent)) >> 22;
+        if (unfilteredResistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
+        {
+          unfilteredResistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
+        }
+        if (unfilteredResistance > ((uint64_t)VOLTMETER_INPUT_RESISTANCE))
+        {
+          unfilteredResistance = VOLTMETER_INPUT_RESISTANCE; /* Resistance cannot be larger than the voltmeter input resistance */
+        }
+      }
+      measurementValues.unfilteredResistance = (uint32_t)unfilteredResistance;             
+      measurementValues.counter++;
+      measurementValues.milliseconds = millis();
+        
+      if ((currentErrorCounter != AmmeterError->errorCounter) || (voltageErrorCounter != VoltmeterError->errorCounter))
+      {
+        /* Measurement invalid */
+        MeasurementError.error = ErrorMessaging_Measurement_Invalid;
+        MeasurementError.errorCounter++;
+        currentErrorCounter = AmmeterError->errorCounter;
+        voltageErrorCounter = VoltmeterError->errorCounter;
+      }
     }
   }
 }
@@ -168,6 +177,11 @@ void Measurement_Do(void)
 const Measurement_Values * Measurement_GetValues(void)
 {
   return &measurementValues;
+}
+
+void Measurement_Invalidate(void)
+{
+  invalidated = true;
 }
 
 const ErrorMessaging_Error * Measurement_GetError(void)

@@ -40,6 +40,8 @@ void VoltageSetter_Do(void)
 {
   uint32_t dac;
   RangeSwitcher_VoltageRanges range;
+  RangeSwitcher_VoltageRanges previousRange = RangeSwitcher_GetVoltageRange();
+  Control_CCCVStates previousCCCVState = Control_GetCCCV();
   
   /* Calculate range */
   if (presentVoltage > VOLTAGESETTER_HYSTERESIS_UP)
@@ -91,6 +93,12 @@ void VoltageSetter_Do(void)
   }
   /* Set phase CV */
   Control_SetCCCV(Control_CCCV_CV);
+
+  /* If range or mode has changed, invalidate the next measurement because the measurement may occur during the change */
+  if ((previousRange != range) || (previousCCCVState != Control_CCCV_CV))
+  {
+    Measurement_Invalidate();
+  }
 }
 
 void VoltageSetter_SetVoltage(uint32_t voltage)

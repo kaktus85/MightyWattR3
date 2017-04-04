@@ -38,6 +38,8 @@ void CurrentSetter_Init(void)
 void CurrentSetter_Do(void)
 {
   uint32_t dac = 0;
+  RangeSwitcher_CurrentRanges previousRange = RangeSwitcher_GetCurrentRange();
+  Control_CCCVStates previousCCCVState = Control_GetCCCV();
   RangeSwitcher_CurrentRanges range = CurrentRange_LowCurrent;
   
   if (presentCurrent > 0) /* on zero current set true zero to DAC */
@@ -98,6 +100,12 @@ void CurrentSetter_Do(void)
   }  
   /* Set phase CC */
   Control_SetCCCV(Control_CCCV_CC);
+
+  /* If range or mode has changed, invalidate the next measurement because the measurement may occur during the change */
+  if ((previousRange != range) || (previousCCCVState != Control_CCCV_CC))
+  {
+    Measurement_Invalidate();
+  }
 }
 
 void CurrentSetter_SetCurrent(uint32_t current)

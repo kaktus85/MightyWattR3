@@ -99,6 +99,11 @@ void Measurement_Do(void);
 const Measurement_Values * Measurement_GetValues(void);
 
 /**
+ * Invalidates the next measurement without triggering error
+ */
+void Measurement_Invalidate(void);
+
+/**
  * Returns error structure for this module
  *
  * @return - Pointer to constant error structure
