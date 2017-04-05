@@ -31,8 +31,8 @@
 #define ADS1x15_LO_THRESH           0
 
 /* Data rates */
-#ifdef ADC_TYPE_ADS1x15
-  #define ADS1x15_DataRates          ADS1x15_DataRates
+#ifdef ADC_TYPE_ADS1015
+  #define ADS1x15_DataRates          ADS1015_DataRates
 #elif defined(ADC_TYPE_ADS1115)
   #define ADS1x15_DataRates          ADS1115_DataRates
 #else
