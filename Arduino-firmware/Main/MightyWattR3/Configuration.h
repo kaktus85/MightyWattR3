@@ -58,7 +58,7 @@
 
 /* MightyWatt R3 parameters */
 
-#define FIRMWARE_VERSION                 	"3.0.4"
+#define FIRMWARE_VERSION                 	"3.0.5"
 #define BOARD_REVISION                   	"3.1.0"
 #define VOLTMETER_INPUT_RESISTANCE       	1000000000UL
 #define MAXIMUM_POWER                    	75000000UL

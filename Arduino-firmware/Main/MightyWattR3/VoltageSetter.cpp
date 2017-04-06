@@ -54,22 +54,32 @@ void VoltageSetter_Do(void)
   }
   else
   {
-    range = RangeSwitcher_GetVoltageRange();
+    range = previousRange;
   }
       
   switch (range)
   {
     case VoltageRange_HighVoltage:
-      dac = (((uint64_t)((int32_t)presentVoltage + VOLTSETTER_OFFSET_HI)) << 16) / VOLTSETTER_SLOPE_HI;
-      if (dac > DAC_MAXIMUM) /* Set voltage higher than maximum */
+      if ((int32_t)presentVoltage + VOLTSETTER_OFFSET_HI > 0)
       {
-        VoltageSetterError.errorCounter++;
-        VoltageSetterError.error = ErrorMessaging_VoltageSetter_SetVoltageOverload;
-        dac = DAC_MAXIMUM;
+        dac = ((((uint64_t)((int32_t)presentVoltage + VOLTSETTER_OFFSET_HI))) << 16) / VOLTSETTER_SLOPE_HI;
+        if (dac > DAC_MAXIMUM) /* Set voltage higher than maximum */
+        {
+          VoltageSetterError.errorCounter++;
+          VoltageSetterError.error = ErrorMessaging_VoltageSetter_SetVoltageOverload;
+          dac = DAC_MAXIMUM;
+        }
       }
     break;
     case VoltageRange_LowVoltage:
-      dac = (((uint64_t)((int32_t)presentVoltage + VOLTSETTER_OFFSET_LO)) << 16) / VOLTSETTER_SLOPE_LO;
+      if ((int32_t)presentVoltage + VOLTSETTER_OFFSET_LO > 0)
+      {
+          dac = ((((uint64_t)((int32_t)presentVoltage + VOLTSETTER_OFFSET_LO))) << 16) / VOLTSETTER_SLOPE_LO;
+          if (dac > DAC_MAXIMUM) /* Set voltage higher than maximum */
+          {
+            dac = DAC_MAXIMUM;
+          }
+      }
     break;
     default:      
     return;

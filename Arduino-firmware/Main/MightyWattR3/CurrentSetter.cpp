@@ -51,27 +51,37 @@ void CurrentSetter_Do(void)
     }
     else if (presentCurrent < CURRENTSETTER_HYSTERESIS_DOWN)
     {
-      range = CurrentRange_LowCurrent;
+      range = CurrentRange_LowCurrent;      
     }
     else
     {
-      range = RangeSwitcher_GetCurrentRange();
+      range = previousRange;
     }
 
     /* Calculate DAC value */
     switch (range)
     {
-      case CurrentRange_HighCurrent:        
-        dac = (((uint64_t)((int32_t)presentCurrent + CURRENTSETTER_OFFSET_HI)) << 16) / CURRENTSETTER_SLOPE_HI;
-        if (dac > DAC_MAXIMUM) /* Set current higher than maximum */
+      case CurrentRange_HighCurrent:    
+        if ((int32_t)presentCurrent + CURRENTSETTER_OFFSET_HI > 0)
         {
-          CurrentSetterError.errorCounter++;
-          CurrentSetterError.error = ErrorMessaging_CurrentSetter_SetCurrentOverload;
-          dac = DAC_MAXIMUM;
-        }      
+          dac = ((((uint64_t)((int32_t)presentCurrent + CURRENTSETTER_OFFSET_HI))) << 16) / CURRENTSETTER_SLOPE_HI;        
+          if (dac > DAC_MAXIMUM) /* Set current higher than maximum */
+          {
+            CurrentSetterError.errorCounter++;
+            CurrentSetterError.error = ErrorMessaging_CurrentSetter_SetCurrentOverload;
+            dac = DAC_MAXIMUM;
+          }      
+        }
       break;
       case CurrentRange_LowCurrent:
-        dac = (((uint64_t)((int32_t)presentCurrent + CURRENTSETTER_OFFSET_LO)) << 16) / CURRENTSETTER_SLOPE_LO;     
+        if ((int32_t)presentCurrent + CURRENTSETTER_OFFSET_LO > 0)
+        {        
+          dac = ((((uint64_t)((int32_t)presentCurrent + CURRENTSETTER_OFFSET_LO))) << 16) / CURRENTSETTER_SLOPE_LO;
+          if (dac > DAC_MAXIMUM) /* Set current higher than maximum */
+          {
+            dac = DAC_MAXIMUM;
+          }          
+        }        
       break;
       default:      
       return;

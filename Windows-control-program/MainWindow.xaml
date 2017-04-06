@@ -85,7 +85,7 @@
         <GroupBox Header="Program" Margin="12,182,6,31" Name="groupBox2">
             <Grid Height="Auto">
                 <CheckBox Content="Loop" HorizontalAlignment="Left" Margin="11,0,0,38" Name="checkBoxProgramLoop" Height="16" VerticalAlignment="Bottom" Checked="checkBoxProgramLoop_Checked" Unchecked="checkBoxProgramLoop_Unchecked" />
-                <TextBox Height="23" HorizontalAlignment="Left" Margin="91,0,0,34" Name="textBoxProgramLoopCount" VerticalAlignment="Bottom" Width="60" Text="" IsEnabled="False" LostFocus="textBoxProgramLoopCount_LostFocus" TextChanged="textBoxProgramLoopCount_TextChanged" />
+                <TextBox Height="23" HorizontalAlignment="Left" Margin="91,0,0,34" Name="textBoxProgramLoopCount" VerticalAlignment="Bottom" Width="60" Text="" IsEnabled="False" LostFocus="textBoxProgramLoopCount_LostFocus" TextChanged="textBoxProgramLoopCount_TextChanged" MaxLength="8" />
                 <Label Content="times" Height="28" HorizontalAlignment="Left" Margin="151,0,0,31" Name="label1" VerticalAlignment="Bottom" />
                 <ListBox Margin="6,10,324,63" Name="listBoxProgram" ItemsSource="{Binding}">
                     <ListBox.ContextMenu>
@@ -115,8 +115,8 @@
                             </ComboBox>
                             <Label Content="Value" Height="28" HorizontalAlignment="Left" Margin="6,33,0,0" Name="labelProgramConstantValue" VerticalAlignment="Top" />
                             <Label Content="Duration" Height="28" HorizontalAlignment="Left" Margin="6,61,0,0" Name="labelProgramConstantDuration" VerticalAlignment="Top" />
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,35,0,0" Name="textBoxProgramConstantValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,63,0,0" Name="textBoxProgramConstantDuration" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,35,0,0" Name="textBoxProgramConstantValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,63,0,0" Name="textBoxProgramConstantDuration" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
                             <ComboBox Height="23" HorizontalAlignment="Left" Margin="146,63,0,0" Name="comboBoxProgramConstantUnit" VerticalAlignment="Top" Width="60" />
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="136,33,0,0" Name="labelProgramConstantUnit" VerticalAlignment="Top" Width="23" />
                             <CheckBox Content="Previous" Height="16" HorizontalAlignment="Left" Margin="167,38,0,0" Name="checkBoxProgramConstantPrevious" VerticalAlignment="Top" Checked="checkBoxProgramConstantPrevious_Checked" Unchecked="checkBoxProgramConstantPrevious_Unchecked" />
@@ -128,7 +128,7 @@
                                 <ComboBoxItem Content="&lt;" />
                                 <ComboBoxItem Content="&gt;" />
                             </ComboBox>
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="213,91,0,0" Name="textBoxProgramConstantSkipValue" Text="0" VerticalAlignment="Top" Width="60" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="213,91,0,0" Name="textBoxProgramConstantSkipValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="273,89,0,0" Name="labelProgramConstantSkipUnit" VerticalAlignment="Top" Width="23" />
                         </Grid>
                     </TabItem>
@@ -140,9 +140,9 @@
                             <Label Content="Intial value" Height="28" HorizontalAlignment="Left" Margin="6,33,0,0" Name="labelProgramRampInitialValue" VerticalAlignment="Top" />
                             <Label Content="Final value" Height="28" HorizontalAlignment="Left" Margin="6,61,0,0" Name="labelProgramRampFinalValue" VerticalAlignment="Top" />
                             <Label Content="Duration" Height="28" HorizontalAlignment="Left" Margin="6,89,0,0" Name="labelProgramRampDuration" VerticalAlignment="Top" />
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,35,0,0" Name="textBoxProgramRampInitialValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,63,0,0" Name="textBoxProgramRampFinalValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,91,0,0" Name="textBoxProgramRampDuration" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,35,0,0" Name="textBoxProgramRampInitialValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,63,0,0" Name="textBoxProgramRampFinalValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="76,91,0,0" Name="textBoxProgramRampDuration" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
                             <ComboBox Height="23" HorizontalAlignment="Left" Margin="146,91,0,0" Name="comboBoxProgramRampDurationUnit" VerticalAlignment="Top" Width="60" />
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" Margin="136,33,0,0" Name="labelProgramRampInitialValueUnit" VerticalAlignment="Top" Width="23" HorizontalContentAlignment="Center" />
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" Margin="136,61,0,0" Name="labelProgramRampFinalValueUnit" VerticalAlignment="Top" Width="23" HorizontalContentAlignment="Center" />
@@ -155,7 +155,7 @@
                                 <ComboBoxItem Content="&lt;" />
                                 <ComboBoxItem Content="&gt;" />
                             </ComboBox>
-                            <TextBox Height="23" HorizontalAlignment="Left" Margin="213,119,0,0" Name="textBoxProgramRampSkipValue" Text="0" VerticalAlignment="Top" Width="60" />
+                            <TextBox Height="23" HorizontalAlignment="Left" Margin="213,119,0,0" Name="textBoxProgramRampSkipValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="273,117,0,0" Name="labelProgramRampSkipUnit" VerticalAlignment="Top" Width="23" />
                         </Grid>
                     </TabItem>
@@ -171,7 +171,7 @@
                 </ComboBox>
                 <Button Content="Set" Height="23" HorizontalAlignment="Left" Margin="6,38,0,0" Name="buttonManualSet" VerticalAlignment="Top" Width="70" Click="buttonManualSet_Click" />
                 <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="104,37,0,0" Name="buttonManualStop" VerticalAlignment="Top" Width="70" Click="buttonManualStop_Click" />
-                <TextBox Height="23" HorizontalAlignment="Left" Margin="179,9,0,0" Name="textBoxManualValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="6" />
+                <TextBox Height="23" HorizontalAlignment="Left" Margin="179,9,0,0" Name="textBoxManualValue" Text="0" VerticalAlignment="Top" Width="60" MaxLength="8" />
                 <Label Content="X" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="239,7,-2,0" Name="labelManualUnit" VerticalAlignment="Top" Width="23" />
             </Grid>
         </GroupBox>
@@ -203,7 +203,7 @@
                     <ComboBoxItem Content="&lt;" />
                     <ComboBoxItem Content="&gt;" />
                 </ComboBox>
-                <TextBox Height="23" Margin="214,6,0,0" Name="textBoxWatchdogValue" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60" Text="0" />
+                <TextBox Height="23" Margin="214,6,0,0" Name="textBoxWatchdogValue" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60" Text="0" MaxLength="8" />
                 <Label Content="W" Height="28" HorizontalAlignment="Left" Margin="274,4,0,0" Name="labelWatchdogUnit" VerticalAlignment="Top" />
             </Grid>
         </GroupBox>

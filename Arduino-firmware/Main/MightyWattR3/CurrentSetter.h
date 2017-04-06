@@ -22,8 +22,8 @@
 #define CURRENT_SETTER_MAXIMUM_HICURRENT               (CURRENTSETTER_SLOPE_HI - CURRENTSETTER_OFFSET_HI)
 #define CURRENT_SETTER_MAXIMUM_LOCURRENT               (CURRENTSETTER_SLOPE_LO - CURRENTSETTER_OFFSET_LO)
 
-#define CURRENTSETTER_HYSTERESIS_UP           (CURRENTSETTER_SLOPE_LO * 24 / 25 - CURRENTSETTER_OFFSET_LO) /* if over 96 %, go up */
-#define CURRENTSETTER_HYSTERESIS_DOWN         (CURRENTSETTER_SLOPE_LO * 9 / 10 - CURRENTSETTER_OFFSET_LO) /* if below 90 %, go down */
+#define CURRENTSETTER_HYSTERESIS_UP                    ((CURRENTSETTER_SLOPE_LO * 24) / 25 - CURRENTSETTER_OFFSET_LO) /* if over 96 %, go up */
+#define CURRENTSETTER_HYSTERESIS_DOWN                  ((CURRENTSETTER_SLOPE_LO * 9) / 10 - CURRENTSETTER_OFFSET_LO) /* if below 90 %, go down */
 
 /* </Defines> */ 
 
@@ -85,3 +85,4 @@ const ErrorMessaging_Error * CurrentSetter_GetError(void);
 /* </Declarations (prototypes)> */ 
 
 #endif /* CURRENTSETTER_H */
+

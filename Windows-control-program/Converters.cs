@@ -165,24 +165,15 @@ namespace MightyWatt
                 string format;
                 double v = value;
                 double absoluteValue = Math.Abs(value);
-                int magnitude = Convert.ToInt32(Math.Ceiling(Math.Log10(absoluteValue)));
-                //if (absoluteValue > 1)
-                //{
-                //    magnitude = Convert.ToInt32(Math.Ceiling(Math.Log10(absoluteValue)));
-                //}
-                //else
-                //{
-                //    magnitude = Convert.ToInt32(Math.Floor(Math.Log10(absoluteValue)));
-                //}
-
+                int magnitude = Convert.ToInt32(Math.Ceiling(Math.Log10(absoluteValue)));          
                 if (absoluteValue < 0.01)
                 {
                     StringBuilder sb = new StringBuilder();
-                    int multiplier = Convert.ToInt32(Math.Pow(10, 1 - magnitude));
+                    long multiplier = Convert.ToInt64(Math.Pow(10, 1 - magnitude));
                     v = Math.Round(value * multiplier, significantDigits - 1);
                     sb.Append(v.ToString("f" + (significantDigits - 1).ToString(), culture));
                     sb.Append("E");                    
-                    sb.Append(magnitude.ToString("D2"));
+                    sb.Append((magnitude - 1).ToString("D2"));
                     return sb.ToString();
                     //return v.ToString("f" + (significantDigits - 1).ToString(), culture) + "E" + magnitude.ToString("D2");
                 }
