@@ -56,7 +56,9 @@ enum Communication_WriteCommands : uint8_t
   WriteCommand_MeasurementSpeed = 12,
   WriteCommand_FanRules = 13,
   WriteCommand_LEDRules = 14,
-  WriteCommand_LEDBrightness = 15  
+  WriteCommand_LEDBrightness = 15,
+  WriteCommand_CurrentRangeAuto = 16,
+  WriteCommand_VoltageRangeAuto = 17,
 };
 
 /**

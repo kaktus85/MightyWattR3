@@ -17,7 +17,7 @@ namespace MightyWatt
     public enum LEDBrightnesses : byte { Off = 0, Low = 23, Medium = 105, High = 255 }; // Pre-defined brightness levels using 2.2 gamma correction
     public enum LEDRules : byte { AlwaysOff = 0, P1 = 1, V1 = 2, I1 = 4, P10 = 8, V10 = 16, I10 = 32, T50 = 64, AlwaysOn = 128 };
     public enum FanRules : byte { AlwaysOn, AutoCool, AutoQuiet };
-    public enum MeasurementFilters : byte { UnfilteredNoADCAutoranging, Unfiltered, Filtered }; /* Fast - no filter, no ADC autoranging (not used), Medium - no filter, ADC autoranging enabled, Slow - filter & ADC autoranging */
+    public enum MeasurementFilters : byte { UnfilteredNoADCAutoranging, Unfiltered, Filtered };
 
     public delegate void GuiUpdateDelegate();
     public delegate void WatchdogStopDelegate();
@@ -70,18 +70,22 @@ namespace MightyWatt
         private DateTime lastProgramLog = DateTime.MinValue;
 
         // minimum firmware version
-        public static readonly int[] MinimumFWVersion = new int[] { 3, 0, 0 };
+        public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 0 };
 
-        // LED, fan and measurements filter settings
+        // LED, fan, measurements filter and autoranging settings
         public const LEDBrightnesses DefaultLEDBrightness = LEDBrightnesses.Medium;
         public const byte DefaultLEDRule = (byte)LEDRules.I1;
         public const FanRules DefaultFanRule = FanRules.AlwaysOn;
         public const MeasurementFilters DefaultMeasurementFilter = MeasurementFilters.Filtered;
+        public const bool DefaultAutorangingCurrent = true;
+        public const bool DefaultAutorangingVoltage = true;
 
         private LEDBrightnesses _LEDBrightness = DefaultLEDBrightness;
         private byte _LEDRule = DefaultLEDRule;
         private FanRules _FanRule = DefaultFanRule;
         private MeasurementFilters _MeasurementFilter = DefaultMeasurementFilter;
+        private bool _AutorangingCurrent = DefaultAutorangingCurrent;
+        private bool _AutorangingVoltage = DefaultAutorangingVoltage;
 
         // external resistance watchdog
         public event WatchdogStopDelegate SeriesResistanceWatchdogStop; // event that is raised when series resistance watchdog has stopped the load
@@ -121,6 +125,8 @@ namespace MightyWatt
                 device.SetValue(WriteCommands.LEDRules, LEDRule);
                 device.SetValue(WriteCommands.FanRules, (byte)FanRule);
                 device.SetValue(WriteCommands.MeasurementFilter, (byte)MeasurementFilter);
+                device.SetValue(WriteCommands.CurrentRangeAuto, Convert.ToByte(AutorangingCurrent));
+                device.SetValue(WriteCommands.VoltageRangeAuto, Convert.ToByte(AutorangingVoltage));
                 device.Set(Modes.Current, 0);
             }
             catch (IOException ex)
@@ -815,6 +821,38 @@ namespace MightyWatt
                 {
                     _MeasurementFilter = value;
                     device.SetValue(WriteCommands.MeasurementFilter, (byte)value);
+                }
+            }
+        }
+
+        public bool AutorangingCurrent
+        {
+            get
+            {
+                return _AutorangingCurrent;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    _AutorangingCurrent = value;
+                    device.SetValue(WriteCommands.CurrentRangeAuto, Convert.ToByte(value));
+                }
+            }
+        }
+
+        public bool AutorangingVoltage
+        {
+            get
+            {
+                return _AutorangingVoltage;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    _AutorangingVoltage = value;
+                    device.SetValue(WriteCommands.VoltageRangeAuto, Convert.ToByte(value));
                 }
             }
         }

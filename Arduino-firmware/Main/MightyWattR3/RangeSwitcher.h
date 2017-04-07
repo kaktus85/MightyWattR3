@@ -59,6 +59,11 @@ enum RangeSwitcher_VoltageRanges
 void RangeSwitcher_Init(void);
 
 /**
+ * Executable function which must be called periodically
+ */
+void RangeSwitcher_Do(void);
+
+/**
  * Sets requested current range
  * 
  * @param range - Current range to set
@@ -85,6 +90,23 @@ RangeSwitcher_CurrentRanges RangeSwitcher_GetCurrentRange(void);
  * @return - the voltage range setting
  */
 RangeSwitcher_VoltageRanges RangeSwitcher_GetVoltageRange(void);
+
+/**
+ * Gets whether the current setter should use autoranging
+ * If true, it can, if false, the range should be fixed on high range
+ * 
+ * @return - True if autoranging is allowed by user
+ */
+bool RangeSwitcher_CanAutorangeCurrent(void);
+
+/**
+ * Gets whether the voltage setter should use autoranging
+ * If true, it can, if false, the range should be fixed on high range
+ * 
+ * @return - True if autoranging is allowed by user
+ */
+bool RangeSwitcher_CanAutorangeVoltage(void);
+
 
 /* </Declarations (prototypes)> */ 
 

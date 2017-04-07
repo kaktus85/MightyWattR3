@@ -209,6 +209,8 @@ namespace MightyWatt
             bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemSettingsFan, MenuItem.IsEnabledProperty));
             menuItemSettingsMeasurementFilter.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
             bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemSettingsMeasurementFilter, MenuItem.IsEnabledProperty));
+            menuItemSettingsAutoranging.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
+            bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemSettingsAutoranging, MenuItem.IsEnabledProperty));
             menuItemSettingsSeriesResistance.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
             bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemSettingsSeriesResistance, MenuItem.IsEnabledProperty));
             menuItemToolsIntegratorsAndStatistics.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
@@ -962,6 +964,30 @@ namespace MightyWatt
             }
         }
 
+        public bool AutorangingCurrent
+        {
+            get
+            {
+                return load == null ? Load.DefaultAutorangingCurrent : load.AutorangingCurrent;
+            }
+            set
+            {
+                load.AutorangingCurrent = value;                
+            }
+        }
+
+        public bool AutorangingVoltage
+        {
+            get
+            {
+                return load == null ? Load.DefaultAutorangingVoltage : load.AutorangingVoltage;
+            }
+            set
+            {
+                load.AutorangingVoltage = value;
+            }
+        }
+
         public string StatusBarConnectionString
         {
             get
@@ -1177,6 +1203,77 @@ namespace MightyWatt
                 statisticsWindow.Closed += StatisticsWindow_Closed;
                 statisticsWindow.Show();
             }            
+        }
+
+        // loads settings from a XML file
+        private void menuItemSettingsLoad_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.AddExtension = true;
+            dialog.DefaultExt = ".xml";
+            dialog.Filter = "XML files (*.xml)|*.xml|All Files (*.*)|*.*";
+            dialog.Title = "Load settings";
+            dialog.ValidateNames = true;
+            if (dialog.ShowDialog() == true)
+            {
+                xmlSettings = new Xml(dialog.FileName);
+                bool enableLoop;
+                int totalLoops;
+                bool isRemote;
+                double periodSeconds;
+                TimeUnits periodTimeUnits;
+                LEDBrightnesses LEDBrightness;
+                byte LEDRule;
+                FanRules FanRule;
+                MeasurementFilters MeasurementFilter;
+                bool CurrentAutoranging, VoltageAutoranging;
+                try
+                {
+                    xmlSettings.LoadSettings(out enableLoop, out totalLoops, out isRemote, out periodSeconds, out periodTimeUnits, out LEDBrightness, out LEDRule, out FanRule, out MeasurementFilter, out CurrentAutoranging, out VoltageAutoranging);
+
+                    // loop
+                    checkBoxProgramLoop.IsChecked = enableLoop;
+                    if (totalLoops > 0)
+                    {
+                        textBoxProgramLoopCount.Text = totalLoops.ToString();
+                        radioButtonProgramLoopFinite.IsChecked = true;
+                        radioButtonProgramLoopInfinite.IsChecked = false;
+                    }
+                    else
+                    {
+                        radioButtonProgramLoopFinite.IsChecked = false;
+                        radioButtonProgramLoopInfinite.IsChecked = true;
+                    }
+
+                    // remote
+                    if (load.IsConnected)
+                    {
+                        load.SetRemote(isRemote);
+                    }
+
+                    // LED
+                    load.LEDBrightness = LEDBrightness;
+                    load.LEDRule = LEDRule;
+
+                    // Fan
+                    load.FanRule = FanRule;
+
+                    // Measurement filter
+                    load.MeasurementFilter = MeasurementFilter;
+
+                    // Autoranging
+                    load.AutorangingCurrent = CurrentAutoranging;
+                    load.AutorangingVoltage = VoltageAutoranging;
+
+                    // logging period
+                    load.LoggingPeriod = periodSeconds;
+                    load.LoggingTimeUnit = periodTimeUnits;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Cannot read XML file", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
         }
 
         private void StatisticsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -1513,7 +1610,7 @@ namespace MightyWatt
                     isLoopEnabled = (bool)this.checkBoxProgramLoop.IsChecked;
                 }
                 xmlSettings.SaveItems(this.load.ProgramItems, isLoopEnabled, this.load.TotalLoops, this.load.Remote,
-                    this.load.LoggingPeriod, this.load.LoggingTimeUnit, load.LEDBrightness, load.LEDRule, load.FanRule, load.MeasurementFilter);
+                    this.load.LoggingPeriod, this.load.LoggingTimeUnit, load.LEDBrightness, load.LEDRule, load.FanRule, load.MeasurementFilter, load.AutorangingCurrent, load.AutorangingVoltage);
             }
         }
 
@@ -1561,10 +1658,11 @@ namespace MightyWatt
                 byte LEDRule;
                 FanRules FanRule;
                 MeasurementFilters MeasurementFilter;
+                bool CurrentAutoranging, VoltageAutoranging;
                 try
                 {
                     xmlSettings.ReplaceItems(this.load.ProgramItems, out enableLoop, out totalLoops, out isRemote, 
-                        out periodSeconds, out periodTimeUnits, out LEDBrightness, out LEDRule, out FanRule, out MeasurementFilter);
+                        out periodSeconds, out periodTimeUnits, out LEDBrightness, out LEDRule, out FanRule, out MeasurementFilter, out CurrentAutoranging, out VoltageAutoranging);
 
                     // loop
                     checkBoxProgramLoop.IsChecked = enableLoop;
@@ -1595,6 +1693,10 @@ namespace MightyWatt
 
                     // Measurement filter
                     load.MeasurementFilter = MeasurementFilter;
+
+                    // Autoranging
+                    load.AutorangingCurrent = CurrentAutoranging;
+                    load.AutorangingVoltage = VoltageAutoranging;
 
                     // logging period
                     load.LoggingPeriod = periodSeconds;

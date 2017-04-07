@@ -25,6 +25,7 @@
 #include "Measurement.h"
 #include "Thermometer.h"
 #include "RangeSwitcher.h"
+#include "MightyWatt.h"
 
 /* </Includes> */
 
@@ -178,10 +179,10 @@ void Communication_Send(void)
     switch (readCommand.command)
     {
       case ReadCommand_IDN:
-        SerialPort.println("MightyWatt R3");
+        SerialPort.println(NAME);
         lastSent = readCommand.commandCounter;
         break;
-      case ReadCommand_QDC:
+      case ReadCommand_QDC:      
         SerialPort.println(CALIBRATION_DATE);
         SerialPort.println(FIRMWARE_VERSION);
         SerialPort.println(BOARD_REVISION);

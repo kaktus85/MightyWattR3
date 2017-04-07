@@ -25,13 +25,7 @@
 #include "ErrorMessaging.h"
 
 #include "Arduino.h"
-
-#ifdef UNO
-  #include <avr/pgmspace.h>
-  #define FLASHMEMORY PROGMEM
-#elif defined(ZERO)
-  #define FLASHMEMORY 
-#endif
+#include "MightyWatt.h"
 
 /* </Includes> */ 
 

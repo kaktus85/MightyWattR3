@@ -19,8 +19,8 @@
             <MenuItem Header="Program items" Name="menuItemExperiment">
                 <MenuItem Header="Save" Name="menuItemExperimentSave" Click="menuItemExperimentSave_Click" />
                 <Separator></Separator>
-                <MenuItem Header="Add" Name="menuItemExperimentAdd" Click="menuItemExperimentAdd_Click" />
-                <MenuItem Header="Replace" Name="menuItemExperimentReplace" Click="menuItemExperimentReplace_Click" />
+                <MenuItem Header="Add" Name="menuItemExperimentAdd" Click="menuItemExperimentAdd_Click" ToolTip="Adds items without overwriting existing or changing settings"/>
+                <MenuItem Header="Replace" Name="menuItemExperimentReplace" Click="menuItemExperimentReplace_Click" ToolTip="Replaces existing items and settings"/>
             </MenuItem>
             <MenuItem Header="Logging" Name="menuItemLogging">
                 <MenuItem Header="New File" Name="menuItemLoggingNewFile" Click="menuItemLoggingNewFile_Click" />
@@ -60,7 +60,14 @@
                     <MenuItem Header="Unfiltered" Name="menuItemSettingsMeasurementFilterUnfiltered" IsCheckable="True" IsChecked="{Binding MeasurementFilterUnfiltered, Mode=TwoWay}"></MenuItem>
                     <MenuItem Header="Filtered" Name="menuItemSettingsMeasurementFilterFiltered" IsCheckable="True" IsChecked="{Binding MeasurementFilterFiltered, Mode=TwoWay}" ToolTip="42-period (~300 ms) triangular weighted moving average"></MenuItem>
                 </MenuItem>
+                <MenuItem Header="Autoranging" Name="menuItemSettingsAutoranging" SubmenuOpened="menuItem_SubmenuOpened">
+                    <MenuItem Header="Current" Name="menuItemSettingsAutorangingCurrent" IsCheckable="True" IsChecked="{Binding AutorangingCurrent, Mode=TwoWay}" ToolTip="Current range on CC modes will be fixed to high if unchecked"></MenuItem>
+                    <MenuItem Header="Voltage" Name="menuItemSettingsAUtorangingVoltage" IsCheckable="True" IsChecked="{Binding AutorangingVoltage, Mode=TwoWay}" ToolTip="Voltage range on CV modes will be fixed to high if unchecked"></MenuItem>
+                </MenuItem>
                 <MenuItem Header="Series resistance" Name="menuItemSettingsSeriesResistance" Click="menuItemSeriesResistance_Click"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="Save" Name="menuItemSettingsSave" Click="menuItemExperimentSave_Click" ToolTip="Save current settings" />
+                <MenuItem Header="Load" Name="menuItemSettingsLoad" Click="menuItemSettingsLoad_Click" ToolTip="Load settings except &quot;Series resistance&quot;" />
             </MenuItem>
             <MenuItem Header="Tools" Name="menuItemTools">
                 <MenuItem Header="Integrators and statistics" Name="menuItemToolsIntegratorsAndStatistics" ToolTip="Charge and dissipated energy integrators, statistics" Click="menuItemToolsIntegratorsAndStatistics_Click"></MenuItem>

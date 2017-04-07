@@ -40,12 +40,12 @@ void CurrentSetter_Do(void)
   uint32_t dac = 0;
   RangeSwitcher_CurrentRanges previousRange = RangeSwitcher_GetCurrentRange();
   Control_CCCVStates previousCCCVState = Control_GetCCCV();
-  RangeSwitcher_CurrentRanges range = CurrentRange_LowCurrent;
+  RangeSwitcher_CurrentRanges range = RangeSwitcher_CanAutorangeCurrent() ? CurrentRange_LowCurrent : CurrentRange_HighCurrent;
   
   if (presentCurrent > 0) /* on zero current set true zero to DAC */
   {   
     /* Calculate range */
-    if (presentCurrent > CURRENTSETTER_HYSTERESIS_UP)
+    if ((presentCurrent > CURRENTSETTER_HYSTERESIS_UP) || (RangeSwitcher_CanAutorangeCurrent() == false))
     {
       range = CurrentRange_HighCurrent;
     }

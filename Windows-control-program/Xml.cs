@@ -18,7 +18,7 @@ namespace MightyWatt
 
         // creates Xml file with program items, loop info, local/remote info and period settings
         public void SaveItems(BindingList<ProgramItem> programItems, bool loopIsEnabled, int loopCount, bool isRemote,
-            double logPeriod, TimeUnits logTimeUnit, LEDBrightnesses LEDBrightness, byte LEDRule, FanRules FanRule, MeasurementFilters MeasurementFilter) 
+            double logPeriod, TimeUnits logTimeUnit, LEDBrightnesses LEDBrightness, byte LEDRule, FanRules FanRule, MeasurementFilters MeasurementFilter, bool AutorangingCurrent, bool AutorangingVoltage) 
         {
             XmlNode declaration = document.CreateXmlDeclaration("1.0", "UTF-8", null);
             document.AppendChild(declaration);
@@ -81,6 +81,18 @@ namespace MightyWatt
             XmlAttribute AMeasurementFilter = document.CreateAttribute("filter");
             AMeasurementFilter.Value = Enum.GetName(typeof(MeasurementFilters), MeasurementFilter);
             MeasurementFilters.Attributes.Append(AMeasurementFilter);
+
+            // Autoranging
+            XmlNode Autoranging = document.CreateElement("autoranging");
+            main.AppendChild(Autoranging);
+            // current
+            XmlAttribute CurrentAutoranging = document.CreateAttribute("current");
+            CurrentAutoranging.Value = AutorangingCurrent.ToString();
+            Autoranging.Attributes.Append(CurrentAutoranging);
+            // voltage
+            XmlAttribute VoltageAutoranging = document.CreateAttribute("voltage");
+            VoltageAutoranging.Value = AutorangingVoltage.ToString();
+            Autoranging.Attributes.Append(VoltageAutoranging);
 
             // logging settings
             XmlNode loggingPeriod = document.CreateElement("logging");
@@ -289,16 +301,13 @@ namespace MightyWatt
             }
         }
 
-        // clears the existing list of program items and replaces them with the items from xml file; changes loop settings, local/remote and period settings according to the xml file
-        public void ReplaceItems(BindingList<ProgramItem> programItems, out bool loopIsEnabled, out int loopCount, out bool isRemote,
-            out double periodSeconds, out TimeUnits periodTimeUnits, out LEDBrightnesses LEDBrightness, out byte LEDRule, out FanRules FanRule, out MeasurementFilters MeasurementFilter)
+        public void LoadSettings(out bool loopIsEnabled, out int loopCount, out bool isRemote, out double periodSeconds, out TimeUnits periodTimeUnits, out LEDBrightnesses LEDBrightness, out byte LEDRule, out FanRules FanRule, out MeasurementFilters MeasurementFilter, out bool CurrentAutoranging, out bool VoltageAutoranging)
         {
             loopIsEnabled = false;
             loopCount = 1;
             isRemote = false;
             periodSeconds = 1;
             periodTimeUnits = TimeUnits.s;
-            programItems.Clear(); // clear program items list
 
             document.Load(this.path);
             XmlElement main;
@@ -320,7 +329,7 @@ namespace MightyWatt
                     }
                     break;
                 }
-            }            
+            }
 
             // remote/local
             XmlNode remote;
@@ -338,7 +347,7 @@ namespace MightyWatt
             }
             else
             {
-                LEDBrightness = Load.DefaultLEDBrightness; 
+                LEDBrightness = Load.DefaultLEDBrightness;
             }
             // rules
             byte ledRule;
@@ -389,13 +398,39 @@ namespace MightyWatt
                 MeasurementFilter = Load.DefaultMeasurementFilter;
             }
 
+            // Autoranging
+            XmlNode Autoranging;
+            Autoranging = main.SelectSingleNode("autoranging");
+            // current
+            if (bool.TryParse(Autoranging.Attributes.GetNamedItem("current").Value, out CurrentAutoranging) == false)
+            {
+                CurrentAutoranging = Load.DefaultAutorangingCurrent;
+            }
+            // voltage
+            if (bool.TryParse(Autoranging.Attributes.GetNamedItem("voltage").Value, out VoltageAutoranging) == false)
+            {
+                VoltageAutoranging = Load.DefaultAutorangingVoltage;
+            }
+
             // period settings
             XmlNode loggingPeriod;
             loggingPeriod = main.SelectSingleNode("logging");
             periodTimeUnits = (TimeUnits)Enum.Parse(typeof(TimeUnits), loggingPeriod.Attributes.GetNamedItem("timeUnit").Value);
             timeConverter = new Converters.TimeConverter(); // convert representation in time-unit to seconds
-            periodSeconds = (double)(timeConverter.ConvertBack(loggingPeriod.Attributes.GetNamedItem("period").Value, typeof(string), periodTimeUnits, System.Globalization.CultureInfo.CurrentCulture));            
-            // elements
+            periodSeconds = (double)(timeConverter.ConvertBack(loggingPeriod.Attributes.GetNamedItem("period").Value, typeof(string), periodTimeUnits, System.Globalization.CultureInfo.CurrentCulture));
+        }
+
+        // clears the existing list of program items and replaces them with the items from xml file; changes loop settings, local/remote and period settings according to the xml file
+        public void ReplaceItems(BindingList<ProgramItem> programItems, out bool loopIsEnabled, out int loopCount, out bool isRemote,
+            out double periodSeconds, out TimeUnits periodTimeUnits, out LEDBrightnesses LEDBrightness, out byte LEDRule, out FanRules FanRule, out MeasurementFilters MeasurementFilter, out bool CurrentAutoranging, out bool VoltageAutoranging)
+        {
+            // load settings
+            LoadSettings(out loopIsEnabled, out loopCount, out isRemote, out periodSeconds, out periodTimeUnits, out LEDBrightness, out LEDRule, out FanRule, out MeasurementFilter, out CurrentAutoranging, out VoltageAutoranging);
+            
+            // clear program items list
+            programItems.Clear();       
+            
+            // add elements
             AddItems(programItems);
         }
     }

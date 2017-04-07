@@ -13,7 +13,7 @@ namespace MightyWatt
     public delegate void ConnectionUpdateDelegate();
     public enum ReadCommands : byte { Measurement = 1, IDN = 2, QDC = 3, ErrorMessages = 4 };
     public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPower = 3, ConstantResistance = 4, ConstantVoltageSoftware = 5, MPPT = 6,
-                                       SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15 };
+                                       SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15, CurrentRangeAuto = 16, VoltageRangeAuto = 17};
 
     class Communication
     {
@@ -231,33 +231,30 @@ namespace MightyWatt
         {
             while (dataToWrite.Count > 0)
             {
-                /*if (port.BytesToWrite == 0)
-                {*/
-                    byte[] data = dataToWrite.Dequeue();
-                    if (data != null)
+                byte[] data = dataToWrite.Dequeue();
+                if (data != null)
+                {
+                    byte[] dataWithCRC = new byte[data.Length + 2];
+                    ushort crc = CRC16(COMMUNICATION_CRC_POLYNOMIAL_VALUE, data, data.Length);
+                    int i;
+                    // copy data
+                    for (i = 0; i < data.Length; i++)
                     {
-                        byte[] dataWithCRC = new byte[data.Length + 2];
-                        ushort crc = CRC16(COMMUNICATION_CRC_POLYNOMIAL_VALUE, data, data.Length);
-                        int i;
-                        // copy data
-                        for (i = 0; i < data.Length; i++)
-                        {
-                            dataWithCRC[i] = data[i];
-                        }
-                        // append CRC
-                        dataWithCRC[i] = Convert.ToByte(crc & 0xFF);
-                        dataWithCRC[i + 1] = Convert.ToByte((crc >> 8) & 0xFF);
-                        //if (dataWithCRC.Length > 3)
-                        //{
-                        //    Console.WriteLine("Data length: {0}", dataWithCRC.Length);
-                        //    foreach (byte b in dataWithCRC)
-                        //    {
-                        //        Console.Write("0x{0:X}\t", b);
-                        //    }
-                        //}
-                    port.Write(dataWithCRC);
+                        dataWithCRC[i] = data[i];
                     }
-               /* }*/
+                    // append CRC
+                    dataWithCRC[i] = Convert.ToByte(crc & 0xFF);
+                    dataWithCRC[i + 1] = Convert.ToByte((crc >> 8) & 0xFF);
+                //if (dataWithCRC.Length > 3)
+                //{
+                //    Console.WriteLine("Data length: {0}", dataWithCRC.Length);
+                //    foreach (byte b in dataWithCRC)
+                //    {
+                //        Console.Write("0x{0:X}\t", b);
+                //    }
+                //}
+                port.Write(dataWithCRC);
+                }
             }     
         }
 

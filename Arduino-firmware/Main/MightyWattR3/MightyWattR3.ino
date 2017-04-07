@@ -7,6 +7,7 @@
 #include <math.h>
 #include <Wire.h>
 
+
 #define CYCLE_COUNTER_ENABLE       false
 
 #if (CYCLE_COUNTER_ENABLE == true)

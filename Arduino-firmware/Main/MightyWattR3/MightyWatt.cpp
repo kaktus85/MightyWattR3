@@ -63,10 +63,11 @@ void MightyWatt_Do(void)
   Ammeter_Do();  
   Thermometer_Do();
   Measurement_Do();
+  RangeSwitcher_Do();
   Control_Do();
   LEDController_Do();
   FanController_Do();
-  Limiter_Do();
+  Limiter_Do();  
   CommunicationWatchdog_Do();
 }
   

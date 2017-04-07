@@ -38,13 +38,13 @@ void VoltageSetter_Init(void)
 
 void VoltageSetter_Do(void)
 {
-  uint32_t dac;
-  RangeSwitcher_VoltageRanges range;
+  uint32_t dac;    
   RangeSwitcher_VoltageRanges previousRange = RangeSwitcher_GetVoltageRange();
-  Control_CCCVStates previousCCCVState = Control_GetCCCV();
+  RangeSwitcher_VoltageRanges range;
+  Control_CCCVStates previousCCCVState = Control_GetCCCV();  
   
   /* Calculate range */
-  if (presentVoltage > VOLTAGESETTER_HYSTERESIS_UP)
+  if ((presentVoltage > VOLTAGESETTER_HYSTERESIS_UP) || (RangeSwitcher_CanAutorangeVoltage() == false))
   {
     range = VoltageRange_HighVoltage;
   }

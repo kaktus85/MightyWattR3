@@ -13,8 +13,24 @@
 /* <Includes> */ 
  
 #include <stdint.h> 
+#include "Configuration.h"
  
 /* </Includes> */ 
+
+
+/* <Defines> */ 
+
+#define NAME                       "MightyWatt R3"
+#define FIRMWARE_VERSION           "3.1.0"
+
+#ifdef UNO
+  #include <avr/pgmspace.h>
+  #define FLASHMEMORY PROGMEM
+#elif defined(ZERO)
+  #define FLASHMEMORY 
+#endif
+
+/* </Defines> */ 
 
 
 /* <Declarations (prototypes)> */ 
