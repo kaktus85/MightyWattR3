@@ -125,11 +125,15 @@ void VoltageSetter_Plus(uint32_t value)
 {
   if ((presentVoltage + value) < presentVoltage || (presentVoltage + value) < value) // overflow check
   {  
-    VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+    VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1);
+  }
+  else if (value + presentVoltage < VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+  {
+    VoltageSetter_SetVoltage(value + presentVoltage);
   }
   else
   {
-    VoltageSetter_SetVoltage(value + presentVoltage);
+    VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1);
   }
 }
 

@@ -133,12 +133,16 @@ void CurrentSetter_SetZero()
 void CurrentSetter_Plus(uint32_t value)
 {
   if ((presentCurrent + value) < presentCurrent || (presentCurrent + value) < value) // overflow check
-  {  
+  {      
     CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+  }
+  else if (value + presentCurrent < CURRENT_SETTER_MAXIMUM_HICURRENT)
+  {
+    CurrentSetter_SetCurrent(value + presentCurrent);
   }
   else
   {
-    CurrentSetter_SetCurrent(value + presentCurrent);
+    CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT - 1);
   }
 }
 

@@ -22,7 +22,8 @@
 
 #define CONTROL_CCCV_PIN                   12
 #define CONTROL_CCCV_PIN_DEFAULT_STATE     CCCV_CC
-#define CONTROL_BANDWIDTH_LIMIT            50 /* ms */
+#define CONTROL_BANDWIDTH_LIMIT_CC         2 /* ms */
+#define CONTROL_BANDWIDTH_LIMIT_CV         20 /* ms */
 
 #define CONTROL_MAXIMUM_HI_CURRENT_STEP    ((uint32_t)(CURRENTSETTER_SLOPE_HI / (uint32_t)16)) /* 1/16 of the range */
 #define CONTROL_MAXIMUM_LO_CURRENT_STEP    ((uint32_t)(CURRENTSETTER_SLOPE_LO / (uint32_t)16)) /* 1/16 of the range */

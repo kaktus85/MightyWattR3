@@ -314,16 +314,18 @@ void Control_SetPowerCC(void)
   stepSize = 0;
   Control_LimitCurrentStepSize(&stepSize);
   lastPower = measurementValues->unfilteredPower;
-  if ((setPower > 0) && (measurementValues->unfilteredVoltage > 0)) // initial estimate I = P/V
-  { 
+  
+  if ((setPower > 0) && (measurementValues->unfilteredVoltage > VOLTMETER_THRESHOLD_VOLTAGE)) // initial estimate I = P/V
+  {     
     uint64_t current = (((uint64_t)setPower) * 1000000) / measurementValues->unfilteredVoltage;
-    if (current <= CURRENT_SETTER_MAXIMUM_HICURRENT)
+
+    if (current >= (uint64_t)CURRENT_SETTER_MAXIMUM_HICURRENT) 
     {
-      CurrentSetter_SetCurrent((uint32_t)(current & 0xFFFFFFFF));      
-    }    
+      CurrentSetter_SetCurrent((uint32_t)(CURRENT_SETTER_MAXIMUM_HICURRENT - 1));
+    }
     else
     {
-      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+      CurrentSetter_SetCurrent((uint32_t)current);
     }
   }
   else
@@ -336,9 +338,9 @@ void Control_KeepPowerCC(void)
 {
   static Control_CurrentActions lastAction = Control_CurrentUp;
   
-  if (/*measurementCounter != measurementValues->counter*/ measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CC)
   {
-    if ((setPower > 0) && (measurementValues->unfilteredVoltage > 0))
+    if ((setPower > 0) && (measurementValues->unfilteredVoltage > VOLTMETER_THRESHOLD_VOLTAGE))
     { 
       Control_SWCC(setPower, &lastPower, measurementValues->unfilteredPower, &lastAction);
     }
@@ -348,13 +350,9 @@ void Control_KeepPowerCC(void)
       stepSize = 0;
       Control_LimitCurrentStepSize(&stepSize);
     }
-    /*measurementCounter = measurementValues->counter;*/
     measurementTimer = measurementValues->milliseconds;
   }
   CurrentSetter_Do();
-//  Serial.print("Power: ");
-//  Serial.print(measurementValues->unfilteredPower / 1000);
-//  Serial.println(" mW");
 }
 
 void Control_SetPowerCV(void)
@@ -362,11 +360,12 @@ void Control_SetPowerCV(void)
   stepSize = 0;
   Control_LimitVoltageStepSize(&stepSize);
   lastPower = measurementValues->unfilteredPower;
+
   if ((setPower > 0))
   { 
     uint64_t voltage;
     
-    if (measurementValues->unfilteredCurrent > 0)
+    if (measurementValues->unfilteredCurrent > AMMETER_THRESHOLD_VOLTAGE)
     {
       voltage = (((uint64_t)setPower) * 1000000) / measurementValues->unfilteredCurrent; // initial estimate V = P/I
     }
@@ -375,18 +374,18 @@ void Control_SetPowerCV(void)
       voltage = measurementValues->unfilteredVoltage; // initial estimate V = measured V
     }
 
-    if (voltage <= VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
-    {
-      VoltageSetter_SetVoltage((uint32_t)(voltage & 0xFFFFFFFF));      
+    if (voltage >= (uint64_t)VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+    {      
+      VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1)); 
     }
     else
-    {
-      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);  
+    {      
+      VoltageSetter_SetVoltage((uint32_t)voltage); 
     }
   }
   else
   {
-    VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+    VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1));
   }
 }
 
@@ -394,15 +393,15 @@ void Control_KeepPowerCV(void)
 {
   static Control_VoltageActions lastAction = Control_VoltageDown;
   
-  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CV)
   {
-    if ((setPower > 0) && (measurementValues->unfilteredVoltage > 0))
+    if ((setPower > 0) && (measurementValues->unfilteredVoltage > VOLTMETER_THRESHOLD_VOLTAGE))
     { 
       Control_SWCV(setPower, &lastPower, measurementValues->unfilteredPower, &lastAction);
     }
     else
     {
-      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+      VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1));      
       stepSize = 0;
       Control_LimitVoltageStepSize(&stepSize);
     }
@@ -416,24 +415,29 @@ void Control_SetResistanceCC(void)
   stepSize = 0;
   Control_LimitCurrentStepSize(&stepSize);
   lastResistance = measurementValues->unfilteredResistance;
-  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredVoltage > 0)) // initial estimate I = V/R
+  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredVoltage > VOLTMETER_THRESHOLD_VOLTAGE)) // initial estimate I = V/R
   { 
-    if (setResistance > 0)
+    if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
+    {    
+      CurrentSetter_SetCurrent(0); 
+    }
+    else if (setResistance > 0)
     {
       uint64_t current = (((uint64_t)measurementValues->unfilteredVoltage) * 1000) / setResistance;
-      if (current <= CURRENT_SETTER_MAXIMUM_HICURRENT)
+
+      if (current >= (uint64_t)CURRENT_SETTER_MAXIMUM_HICURRENT) 
       {
-        CurrentSetter_SetCurrent((uint32_t)(current & 0xFFFFFFFF));
+        CurrentSetter_SetCurrent((uint32_t)(CURRENT_SETTER_MAXIMUM_HICURRENT - 1));
       }
       else
       {
-        CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+        CurrentSetter_SetCurrent((uint32_t)current);
       }
     }  
     else
     {
       // Set maximum current on zero resistance
-      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+      CurrentSetter_SetCurrent((uint32_t)(CURRENT_SETTER_MAXIMUM_HICURRENT - 1));
     }
   }
 }
@@ -442,7 +446,7 @@ void Control_KeepResistanceCC(void)
 {
   static Control_CurrentActions lastAction = Control_CurrentUp;
   
-  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CC)
   {    
     if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
     {
@@ -454,7 +458,7 @@ void Control_KeepResistanceCC(void)
     }        
     else
     {
-      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+      CurrentSetter_SetCurrent((uint32_t)(CURRENT_SETTER_MAXIMUM_HICURRENT - 1));
     } 
     measurementTimer = measurementValues->milliseconds;    
   }  
@@ -466,22 +470,23 @@ void Control_SetResistanceCV(void)
   stepSize = 0;
   Control_LimitVoltageStepSize(&stepSize);
   lastResistance = measurementValues->unfilteredResistance;
-  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredCurrent > 0)) // initial estimate V = R * I
+  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredCurrent > AMMETER_THRESHOLD_VOLTAGE)) // initial estimate V = R * I
   { 
     if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
     {    
-      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+      VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1)); 
     }
     else if (setResistance > 0)
     {
       uint64_t voltage = ((((uint64_t)measurementValues->unfilteredVoltage)) * setResistance) / 1000;
-      if (voltage <= VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+
+      if (voltage >= (uint64_t)VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
       {
-        VoltageSetter_SetVoltage((uint32_t)(voltage & 0xFFFFFFFF));
+        VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1)); 
       }
       else
       {
-        VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+        VoltageSetter_SetVoltage((uint32_t)voltage);
       }
     }
     else
@@ -496,11 +501,11 @@ void Control_KeepResistanceCV(void)
 {
   static Control_VoltageActions lastAction = Control_VoltageDown;
   
-  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CV)
   {    
     if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
     {
-      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+      VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1));
     }
     else if (setResistance > 0)
     {            
@@ -520,23 +525,38 @@ void Control_SetVoltageSoftware(void)
   stepSize = 0;
   Control_LimitCurrentStepSize(&stepSize);
   lastVoltage = measurementValues->unfilteredVoltage;
+  VoltageSetter_SetVoltage(lastVoltage);
+
+  if (lastVoltage < (uint32_t)VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+  { 
+    VoltageSetter_SetVoltage(lastVoltage); // Set the last measured voltage as the initial estimate
+  }
+  else
+  {
+    VoltageSetter_SetVoltage((uint32_t)(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE - 1)); 
+  }
 }
 
 void Control_KeepVoltageSoftware(void)
 {
   static Control_CurrentActions lastAction = Control_CurrentUp;
   
-  if (measurementCounter != measurementValues->counter)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CC)
   {    
-    if (setVoltage > 0)
+    if (setVoltage == 0)
+    {
+      CurrentSetter_SetCurrent((uint32_t)(CURRENT_SETTER_MAXIMUM_HICURRENT - 1));
+    }
+    else if (measurementValues->unfilteredVoltage < VOLTMETER_THRESHOLD_VOLTAGE)
+    {
+      CurrentSetter_SetCurrent(0);
+    }
+    else
     {            
       Control_SWCC(setVoltage, &lastVoltage, measurementValues->unfilteredVoltage, &lastAction);
-    }        
-    else
-    {
-      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
-    } 
-    measurementCounter = measurementValues->counter;
+    }   
+         
+    measurementTimer = measurementValues->milliseconds;
   }  
   CurrentSetter_Do();
 }
@@ -588,16 +608,16 @@ void Control_KeepMPPT(void)
   }
 
   // main loop
-  if (measurementCounter != measurementValues->counter)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT_CV)
   { 
     action = MPPTAction;
-    if (measurementValues->unfilteredVoltage == 0) /* Increase voltage on zero voltage */
+    if (measurementValues->unfilteredVoltage < VOLTMETER_THRESHOLD_VOLTAGE) /* Increase voltage on zero voltage */
     {
       stepSize = 0;
       Control_LimitVoltageStepSize(&stepSize);
       MPPTAction = Control_VoltageUp;
     }
-    else if (measurementValues->unfilteredCurrent == 0) /* Decrease voltage on zero current */
+    else if (measurementValues->unfilteredCurrent < AMMETER_THRESHOLD_VOLTAGE) /* Decrease voltage on zero current */
     {
       stepSize = 0;
       Control_LimitVoltageStepSize(&stepSize);
@@ -647,7 +667,7 @@ void Control_KeepMPPT(void)
     lastMPPTAction = action;
     lastLastPower = lastPower;
     lastPower = measurementValues->unfilteredPower;
-    measurementCounter = measurementValues->counter;
+    measurementTimer = measurementValues->milliseconds;
   }
   VoltageSetter_Do();  
 }

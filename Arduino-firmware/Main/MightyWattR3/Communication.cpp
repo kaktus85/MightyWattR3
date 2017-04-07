@@ -196,10 +196,10 @@ void Communication_Send(void)
         SerialPort.println(textMessage);
         Flashreader_Read((uint8_t*)textMessage, (uint8_t*)BoardRevision, sizeof(BoardRevision)/sizeof(BoardRevision[0]));
         SerialPort.println(textMessage);
-        SerialPort.println(CURRENT_SETTER_MAXIMUM_HICURRENT);
-        SerialPort.println(AMMETER_MAXIMUM_CURRENT);
-        SerialPort.println(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
-        SerialPort.println(VOLTMETER_MAXIMUM_VOLTAGE);
+        SerialPort.println(CURRENT_SETTER_MAXIMUM_HICURRENT / 65536 * 65535);
+        SerialPort.println(AMMETER_MAXIMUM_CURRENT / 65536 * 65535);
+        SerialPort.println(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE / 65536 * 65535);
+        SerialPort.println(VOLTMETER_MAXIMUM_VOLTAGE / 65536 * 65535);
         SerialPort.println(MAXIMUM_POWER);
         SerialPort.println(VOLTMETER_INPUT_RESISTANCE);
         SerialPort.println(LIMITER_MAXIMUM_TEMPERATURE);

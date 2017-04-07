@@ -245,15 +245,15 @@ namespace MightyWatt
                     // append CRC
                     dataWithCRC[i] = Convert.ToByte(crc & 0xFF);
                     dataWithCRC[i + 1] = Convert.ToByte((crc >> 8) & 0xFF);
-                //if (dataWithCRC.Length > 3)
-                //{
-                //    Console.WriteLine("Data length: {0}", dataWithCRC.Length);
-                //    foreach (byte b in dataWithCRC)
-                //    {
-                //        Console.Write("0x{0:X}\t", b);
-                //    }
-                //}
-                port.Write(dataWithCRC);
+                    //if (dataWithCRC.Length > 3)
+                    //{
+                    //    Console.WriteLine("Data length: {0}", dataWithCRC.Length);
+                    //    foreach (byte b in dataWithCRC)
+                    //    {
+                    //        Console.Write("0x{0:X}\t", b);
+                    //    }
+                    //}
+                    port.Write(dataWithCRC);
                 }
             }     
         }
@@ -272,7 +272,7 @@ namespace MightyWatt
                     {
                         // CRC check failed, drop data
                         //port.Flush(); // clear stream
-                        Console.WriteLine("CRC check failed. Fails so far: {0}.", ++crcFails);
+                        //Console.WriteLine("CRC check failed. Fails so far: {0}.", ++crcFails);
                         return false;
                     }
                     else
