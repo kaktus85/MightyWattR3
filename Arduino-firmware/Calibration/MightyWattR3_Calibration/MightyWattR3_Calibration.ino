@@ -11,6 +11,8 @@
 #include <stdint.h> 
 #include <assert.h>
 
+#define FIRMWARE_VERSION                                "3.1.0"
+
 #define DAC_REFERENCE_VOLTAGE                           AD569xR_REFERENCE_VOLTAGE /* mV */
 #define DAC_MAXIMUM                                     AD569xR_MAXIMUM_VALUE
 #define ADC_RECIPROCAL_LSB                              128UL /* mV^-1 */

@@ -33,7 +33,6 @@
 
 /* MightyWatt R3 parameters */
 
-#define FIRMWARE_VERSION                  "3.0.0"
 #define BOARD_REVISION                    "3.1.0"
 
 /** 
