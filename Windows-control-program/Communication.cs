@@ -12,7 +12,7 @@ namespace MightyWatt
     public delegate void DataUpdateDelegate();
     public delegate void ConnectionUpdateDelegate();
     public enum ReadCommands : byte { Measurement = 1, IDN = 2, QDC = 3, ErrorMessages = 4 };
-    public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPower = 3, ConstantResistance = 4, ConstantVoltageSoftware = 5, MPPT = 6,
+    public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPowerCC = 3, ConstantPowerCV = 4, ConstantResistanceCC = 5, ConstantResistanceCV = 6, ConstantVoltageSoftware = 7, MPPT = 8,
                                        SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15, CurrentRangeAuto = 16, VoltageRangeAuto = 17};
 
     class Communication
@@ -419,13 +419,21 @@ namespace MightyWatt
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.MPPT;
                         break;
-                    case Modes.Power:
+                    case Modes.Power_CC:
                         val = Convert.ToUInt32(value * 1e6);
-                        dataItem[0] |= (byte)WriteCommands.ConstantPower;
+                        dataItem[0] |= (byte)WriteCommands.ConstantPowerCC;
                         break;
-                    case Modes.Resistance:
+                    case Modes.Power_CV:
+                        val = Convert.ToUInt32(value * 1e6);
+                        dataItem[0] |= (byte)WriteCommands.ConstantPowerCV;
+                        break;
+                    case Modes.Resistance_CC:
                         val = Convert.ToUInt32(value * 1000);
-                        dataItem[0] |= (byte)WriteCommands.ConstantResistance;
+                        dataItem[0] |= (byte)WriteCommands.ConstantResistanceCC;
+                        break;                    
+                    case Modes.Resistance_CV:
+                        val = Convert.ToUInt32(value * 1000);
+                        dataItem[0] |= (byte)WriteCommands.ConstantResistanceCV;
                         break;
                     default:
                         return;
@@ -471,7 +479,8 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.Power:
+                    case Modes.Power_CC:
+                    case Modes.Power_CV:
                         {
                             if ((value > MaxPower) || (value < 0))
                             {
@@ -479,7 +488,8 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.Resistance:
+                    case Modes.Resistance_CC:
+                    case Modes.Resistance_CV:
                         {
                             if ((value > DvmInputResistance) || (value < 0))
                             {
@@ -528,11 +538,13 @@ namespace MightyWatt
                     {
                         return current;
                     }
-                case Modes.Power:                
+                case Modes.Power_CC:
+                case Modes.Power_CV:
                     {
                         return voltage * current;
                     }
-                case Modes.Resistance:
+                case Modes.Resistance_CC:
+                case Modes.Resistance_CV:
                     {
                         if (current == 0)
                         {

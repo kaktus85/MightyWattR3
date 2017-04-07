@@ -70,24 +70,44 @@ void Control_SetVoltage(void);
 void Control_KeepVoltage(void);
 
 /**
- * Set-ups constant power logic
+ * Set-ups constant power logic using constant current mode
  */
-void Control_SetPower(void);
+void Control_SetPowerCC(void);
 
 /**
- * Keeps constant power
+ * Keeps constant power using constant current mode
  */
-void Control_KeepPower(void);
+void Control_KeepPowerCC(void);
 
 /**
- * Set-ups constant resistance logic
+ * Set-ups constant power logic using constant voltage mode
  */
-void Control_SetResistance(void);
+void Control_SetPowerCV(void);
 
 /**
- * Keeps constant resistance
+ * Keeps constant power using constant voltage mode
  */
-void Control_KeepResistance(void);
+void Control_KeepPowerCV(void);
+
+/**
+ * Set-ups constant resistance logic using constant current mode
+ */
+void Control_SetResistanceCC(void);
+
+/**
+ * Keeps constant resistance using constant current mode
+ */
+void Control_KeepResistanceCC(void);
+
+/**
+ * Set-ups constant resistance logic using constant voltage mode
+ */
+void Control_SetResistanceCV(void);
+
+/**
+ * Keeps constant resistance using constant voltage mode
+ */
+void Control_KeepResistanceCV(void);
 
 /**
  * Set-ups constant voltage software control loop logic
@@ -156,7 +176,17 @@ void Control_LimitVoltageStepSize(uint32_t * stepSize);
  * @param presentValue - last measured value
  * @param lastAction - pointer to last action (current up or down)
  */
-void Control_SW(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_Actions * lastAction);
+void Control_SWCC(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_CurrentActions * lastAction);
+
+/**
+ * Generic software control loop for CV mode
+ * 
+ * @param setValue - the target value to reach
+ * @param lastValue - pointer to measured value before the last action
+ * @param presentValue - last measured value
+ * @param lastAction - pointer to last action (current up or down)
+ */
+void Control_SWCV(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_VoltageActions * lastAction);
 
 /* </Declarations (prototypes)> */ 
 
@@ -194,15 +224,25 @@ void Control_Do(void)
         Control_SetVoltage();
         Control_Keep = &Control_KeepVoltage;
       break;
-      case WriteCommand_ConstantPower:
+      case WriteCommand_ConstantPowerCC:
         setPower = Data_GetULongFromUCharArray(writeCommand->data);
-        Control_SetPower();
-        Control_Keep = &Control_KeepPower;
+        Control_SetPowerCC();
+        Control_Keep = &Control_KeepPowerCC;
       break;
-      case WriteCommand_ConstantResistance:
+      case WriteCommand_ConstantPowerCV:
+        setPower = Data_GetULongFromUCharArray(writeCommand->data);
+        Control_SetPowerCV();
+        Control_Keep = &Control_KeepPowerCV;
+      break;
+      case WriteCommand_ConstantResistanceCC:
         setResistance = Data_GetULongFromUCharArray(writeCommand->data);
-        Control_SetResistance();
-        Control_Keep = &Control_KeepResistance;
+        Control_SetResistanceCC();
+        Control_Keep = &Control_KeepResistanceCC;
+      break;
+      case WriteCommand_ConstantResistanceCV:
+        setResistance = Data_GetULongFromUCharArray(writeCommand->data);
+        Control_SetResistanceCV();
+        Control_Keep = &Control_KeepResistanceCV;
       break;
       case WriteCommand_ConstantVoltageSoftware:
         setVoltage = Data_GetULongFromUCharArray(writeCommand->data);
@@ -269,7 +309,7 @@ void Control_KeepVoltage(void)
   VoltageSetter_Do();
 }
 
-void Control_SetPower(void)
+void Control_SetPowerCC(void)
 {
   stepSize = 0;
   Control_LimitCurrentStepSize(&stepSize);
@@ -281,18 +321,26 @@ void Control_SetPower(void)
     {
       CurrentSetter_SetCurrent((uint32_t)(current & 0xFFFFFFFF));      
     }    
+    else
+    {
+      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+    }
+  }
+  else
+  {
+    CurrentSetter_SetCurrent(0);
   }
 }
 
-void Control_KeepPower(void)
+void Control_KeepPowerCC(void)
 {
-  static Control_Actions lastAction = Control_CurrentUp;
+  static Control_CurrentActions lastAction = Control_CurrentUp;
   
   if (/*measurementCounter != measurementValues->counter*/ measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
   {
     if ((setPower > 0) && (measurementValues->unfilteredVoltage > 0))
     { 
-      Control_SW(setPower, &lastPower, measurementValues->unfilteredPower, &lastAction);
+      Control_SWCC(setPower, &lastPower, measurementValues->unfilteredPower, &lastAction);
     }
     else
     {
@@ -309,26 +357,92 @@ void Control_KeepPower(void)
 //  Serial.println(" mW");
 }
 
-void Control_SetResistance(void)
+void Control_SetPowerCV(void)
+{
+  stepSize = 0;
+  Control_LimitVoltageStepSize(&stepSize);
+  lastPower = measurementValues->unfilteredPower;
+  if ((setPower > 0))
+  { 
+    uint64_t voltage;
+    
+    if (measurementValues->unfilteredCurrent > 0)
+    {
+      voltage = (((uint64_t)setPower) * 1000000) / measurementValues->unfilteredCurrent; // initial estimate V = P/I
+    }
+    else
+    {
+      voltage = measurementValues->unfilteredVoltage; // initial estimate V = measured V
+    }
+
+    if (voltage <= VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+    {
+      VoltageSetter_SetVoltage((uint32_t)(voltage & 0xFFFFFFFF));      
+    }
+    else
+    {
+      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);  
+    }
+  }
+  else
+  {
+    VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+  }
+}
+
+void Control_KeepPowerCV(void)
+{
+  static Control_VoltageActions lastAction = Control_VoltageDown;
+  
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  {
+    if ((setPower > 0) && (measurementValues->unfilteredVoltage > 0))
+    { 
+      Control_SWCV(setPower, &lastPower, measurementValues->unfilteredPower, &lastAction);
+    }
+    else
+    {
+      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+      stepSize = 0;
+      Control_LimitVoltageStepSize(&stepSize);
+    }
+    measurementTimer = measurementValues->milliseconds;
+  }
+  VoltageSetter_Do();
+}
+
+void Control_SetResistanceCC(void)
 {
   stepSize = 0;
   Control_LimitCurrentStepSize(&stepSize);
   lastResistance = measurementValues->unfilteredResistance;
-  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredVoltage > 0) && (setResistance > 0)) // initial estimate I = V/R
+  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredVoltage > 0)) // initial estimate I = V/R
   { 
-    uint64_t current = (((uint64_t)measurementValues->unfilteredVoltage) * 1000) / setResistance;
-    if (current <= CURRENT_SETTER_MAXIMUM_HICURRENT)
+    if (setResistance > 0)
     {
-      CurrentSetter_SetCurrent((uint32_t)(current & 0xFFFFFFFF));
-    }    
+      uint64_t current = (((uint64_t)measurementValues->unfilteredVoltage) * 1000) / setResistance;
+      if (current <= CURRENT_SETTER_MAXIMUM_HICURRENT)
+      {
+        CurrentSetter_SetCurrent((uint32_t)(current & 0xFFFFFFFF));
+      }
+      else
+      {
+        CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+      }
+    }  
+    else
+    {
+      // Set maximum current on zero resistance
+      CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
+    }
   }
 }
 
-void Control_KeepResistance(void)
+void Control_KeepResistanceCC(void)
 {
-  static Control_Actions lastAction = Control_CurrentUp;
+  static Control_CurrentActions lastAction = Control_CurrentUp;
   
-  if (measurementCounter != measurementValues->counter)
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
   {    
     if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
     {
@@ -336,15 +450,69 @@ void Control_KeepResistance(void)
     }
     else if (setResistance > 0)
     {            
-      Control_SW(setResistance, &lastResistance, measurementValues->unfilteredResistance, &lastAction);
+      Control_SWCC(setResistance, &lastResistance, measurementValues->unfilteredResistance, &lastAction);
     }        
     else
     {
       CurrentSetter_SetCurrent(CURRENT_SETTER_MAXIMUM_HICURRENT);
     } 
-    measurementCounter = measurementValues->counter;
+    measurementTimer = measurementValues->milliseconds;    
   }  
   CurrentSetter_Do();
+}
+
+void Control_SetResistanceCV(void)
+{
+  stepSize = 0;
+  Control_LimitVoltageStepSize(&stepSize);
+  lastResistance = measurementValues->unfilteredResistance;
+  if ((setResistance < VOLTMETER_INPUT_RESISTANCE) && (measurementValues->unfilteredCurrent > 0)) // initial estimate V = R * I
+  { 
+    if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
+    {    
+      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+    }
+    else if (setResistance > 0)
+    {
+      uint64_t voltage = ((((uint64_t)measurementValues->unfilteredVoltage)) * setResistance) / 1000;
+      if (voltage <= VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE)
+      {
+        VoltageSetter_SetVoltage((uint32_t)(voltage & 0xFFFFFFFF));
+      }
+      else
+      {
+        VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+      }
+    }
+    else
+    {
+      // Set zero voltage   
+      VoltageSetter_SetVoltage(0);
+    }
+  }
+}
+
+void Control_KeepResistanceCV(void)
+{
+  static Control_VoltageActions lastAction = Control_VoltageDown;
+  
+  if (measurementValues->milliseconds - measurementTimer > CONTROL_BANDWIDTH_LIMIT)
+  {    
+    if (setResistance >= VOLTMETER_INPUT_RESISTANCE)
+    {
+      VoltageSetter_SetVoltage(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);
+    }
+    else if (setResistance > 0)
+    {            
+      Control_SWCV(setResistance, &lastResistance, measurementValues->unfilteredResistance, &lastAction);
+    }        
+    else
+    {
+      VoltageSetter_SetVoltage(0);
+    } 
+    measurementTimer = measurementValues->milliseconds;    
+  }  
+  VoltageSetter_Do();
 }
 
 void Control_SetVoltageSoftware(void)
@@ -356,13 +524,13 @@ void Control_SetVoltageSoftware(void)
 
 void Control_KeepVoltageSoftware(void)
 {
-  static Control_Actions lastAction = Control_CurrentUp;
+  static Control_CurrentActions lastAction = Control_CurrentUp;
   
   if (measurementCounter != measurementValues->counter)
   {    
     if (setVoltage > 0)
     {            
-      Control_SW(setVoltage, &lastVoltage, measurementValues->unfilteredVoltage, &lastAction);
+      Control_SWCC(setVoltage, &lastVoltage, measurementValues->unfilteredVoltage, &lastAction);
     }        
     else
     {
@@ -486,9 +654,9 @@ void Control_KeepMPPT(void)
 
 //void Control_KeepMPPT(void)
 //{
-//  static Control_Actions MPPTAction = Control_CurrentUp;
-//  static Control_Actions lastMPPTAction = Control_CurrentUp;
-//  static Control_Actions action;
+//  static Control_CurrentActions MPPTAction = Control_CurrentUp;
+//  static Control_CurrentActions lastMPPTAction = Control_CurrentUp;
+//  static Control_CurrentActions action;
 //
 //  if (MPPT_initialized == 0)
 //  {
@@ -605,18 +773,12 @@ void Control_StepSizeCurrentPlus(void)
   /* Increase step size */
   stepSize = stepSize + (stepSize >> 2) + 1;
   Control_LimitCurrentStepSize(&stepSize);
-//  Serial.print("Step size+: ");
-//  Serial.print(stepSize / 1000);
-//  Serial.println(" mA");
 }
 
 void Control_StepSizeCurrentMinus(void)
 {
   stepSize = stepSize >> 1;
   Control_LimitCurrentStepSize(&stepSize);
-//  Serial.print("Step size-: ");
-//  Serial.print(stepSize / 1000);
-//  Serial.println(" mA");
 }
 
 void Control_LimitCurrentStepSize(uint32_t * stepSize)
@@ -660,34 +822,16 @@ void Control_StepSizeVoltagePlus(void)
 {
   RangeSwitcher_VoltageRanges voltageRange = RangeSwitcher_GetVoltageRange();
   uint32_t minimumStep = voltageRange == VoltageRange_HighVoltage ? CONTROL_MINIMUM_HI_VOLTAGE_STEP : CONTROL_MINIMUM_LO_VOLTAGE_STEP;  
-//  Serial.print("Minimum step size: ");
-//  Serial.print(minimumStep);
-//  Serial.println(" uV");
-//  Serial.print("Step size: ");
-//  Serial.print(stepSize);
-//  Serial.println(" uV");
-  //stepSize = stepSize + (stepSize >> 2) + 1;
   stepSize += minimumStep;
-//  Serial.print("Step size+: ");
-//  Serial.print(stepSize);
-//  Serial.println(" uV");
   Control_LimitVoltageStepSize(&stepSize);
-//  Serial.print("Step size limited to: ");
-//  Serial.print(stepSize);
-//  Serial.println(" uV");
-//  Serial.println();
 }
 
 void Control_StepSizeVoltageMinus(void)
 {
   RangeSwitcher_VoltageRanges voltageRange = RangeSwitcher_GetVoltageRange();
   uint32_t minimumStep = voltageRange == VoltageRange_HighVoltage ? CONTROL_MINIMUM_HI_VOLTAGE_STEP : CONTROL_MINIMUM_LO_VOLTAGE_STEP;
-  //stepSize = stepSize >> 1;  
   stepSize -= minimumStep;
   Control_LimitVoltageStepSize(&stepSize);
-//  Serial.print("Step size-: ");
-//  Serial.print(stepSize / 1000);
-//  Serial.println(" mV");
 }
 
 void Control_LimitVoltageStepSize(uint32_t * stepSize)
@@ -727,10 +871,10 @@ void Control_LimitVoltageStepSize(uint32_t * stepSize)
   }
 }
 
-void Control_SW(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_Actions * lastAction)
+void Control_SWCC(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_CurrentActions * lastAction)
 {
   uint32_t lastDifference, presentDifference;
-  Control_Actions action;
+  Control_CurrentActions action;
   
   /* Calculate absolute values of difference between set value (target) and present value */
   if (setValue > *lastValue)
@@ -777,6 +921,63 @@ void Control_SW(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, 
   else
   {
     CurrentSetter_Plus(stepSize);
+  }    
+  
+  /* Assign last values */
+  *lastAction = action;
+  *lastValue = presentValue;
+}
+
+void Control_SWCV(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue, Control_VoltageActions * lastAction)
+{
+  uint32_t lastDifference, presentDifference;
+  Control_VoltageActions action;
+  
+  /* Calculate absolute values of difference between set value (target) and present value */
+  if (setValue > *lastValue)
+  {
+    lastDifference = setValue - *lastValue;
+  }
+  else
+  {
+    lastDifference = *lastValue - setValue;
+  }      
+  if (setValue > presentValue)
+  {
+    presentDifference = setValue - presentValue;
+  }
+  else
+  {
+    presentDifference = presentValue - setValue;
+  }
+  
+  /* If the last action led to favourable outcome, keep it. Otherwise, reverse the action. */
+  if (presentDifference <= lastDifference)
+  {
+    action = *lastAction;     
+    Control_StepSizeVoltagePlus();
+  }
+  else
+  {
+    if (*lastAction == Control_VoltageDown)
+    {
+      action = Control_VoltageUp;
+    }
+    else
+    {
+      action = Control_VoltageDown;
+    }    
+    Control_StepSizeVoltageMinus();     
+  }
+  
+  /* Perform the computed action */
+  if (action == Control_VoltageDown)
+  {
+    VoltageSetter_Minus(stepSize);
+  }
+  else
+  {
+    VoltageSetter_Plus(stepSize);
   }    
   
   /* Assign last values */

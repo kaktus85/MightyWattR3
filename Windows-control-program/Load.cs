@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace MightyWatt
 {
-    public enum Modes : byte { Current, Voltage, Power, Resistance, VoltageSoftware, MPPT };
+    public enum Modes : byte { Current, Voltage, Power_CC, Power_CV, Resistance_CC, Resistance_CV, VoltageSoftware, MPPT };
     public enum TimeUnits : byte { ms, s, min, h }
     public enum Comparison { LessThan, MoreThan }
     public enum ProgramModes : byte { Constant, Ramp };
@@ -42,8 +42,8 @@ namespace MightyWatt
         public int TotalLoops { get; set; } // total number of loops, 0 for infinite
 
         // GUI
-        public static readonly string[] ModeNames = { "Current", "Voltage", "Power", "Resistance", "SW controlled voltage", "Max power point tracker" };
-        public static readonly string[] UnitSymbols = { "A", "V", "W", "Ω", "V", "V"};
+        public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker" };
+        public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V"};
         DateTime lastGuiUpdate = DateTime.Now;
         private double guiUpdatePeriod = 0.2;
         public event GuiUpdateDelegate GuiUpdateEvent;
@@ -408,11 +408,13 @@ namespace MightyWatt
                         return (comparator == Comparison.LessThan) == (Current < value);
                     }
                 case Modes.MPPT:
-                case Modes.Power:
+                case Modes.Power_CC:
+                case Modes.Power_CV:
                     {
                         return (comparator == Comparison.LessThan) == (Power < value);
                     }
-                case Modes.Resistance:
+                case Modes.Resistance_CC:
+                case Modes.Resistance_CV:
                     {
                         return (comparator == Comparison.LessThan) == (Resistance < value);
                     }
@@ -581,7 +583,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Power);
+                return this.device.GetValue(Modes.Power_CC);
             }
         }
 
@@ -589,7 +591,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Resistance);
+                return this.device.GetValue(Modes.Resistance_CC);
             }
         }
 

@@ -22,10 +22,6 @@
 
 #define CONTROL_CCCV_PIN                   12
 #define CONTROL_CCCV_PIN_DEFAULT_STATE     CCCV_CC
-//#define CONTROL_MAXIMUM_CURRENT_STEP       ((uint32_t)(CURRENTSETTER_SLOPE_LO / (uint32_t)16)) /* 1/16 of the lowest range */
-//#define CONTROL_MAXIMUM_VOLTAGE_STEP       ((uint32_t)(VOLTSETTER_SLOPE_LO / (uint32_t)16)) /* 1/16 of the lowest range */
-//#define CONTROL_MINIMUM_CURRENT_STEP       ((uint32_t)(CURRENTSETTER_SLOPE_LO / (uint32_t)DAC_MAXIMUM + 1)) /* microamps */
-//#define CONTROL_MINIMUM_VOLTAGE_STEP       ((uint32_t)(VOLTSETTER_SLOPE_LO / (uint32_t)DAC_MAXIMUM + 1)) /* microvolts */
 #define CONTROL_BANDWIDTH_LIMIT            50 /* ms */
 
 #define CONTROL_MAXIMUM_HI_CURRENT_STEP    ((uint32_t)(CURRENTSETTER_SLOPE_HI / (uint32_t)16)) /* 1/16 of the range */
@@ -52,7 +48,7 @@ enum Control_CCCVStates : uint8_t
   Control_CCCV_CV
 };
 
-enum Control_Actions : uint8_t
+enum Control_CurrentActions : uint8_t
 {
   Control_CurrentDown,
   Control_CurrentUp

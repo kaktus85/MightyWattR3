@@ -73,27 +73,51 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power:
+                case Modes.Power_CC:
                     {
                         if (value != null)
                         {
-                            this.name = "Constant power " + ((double)value).ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Constant power (CC) " + ((double)value).ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
                         }
                         else
                         {
-                            this.name = "Constant power (use previous), " + durationString + " " + timeUnit.ToString();
+                            this.name = "Constant power (CC, use previous), " + durationString + " " + timeUnit.ToString();
                         }
                         break;
                     }
-                case Modes.Resistance:
+                case Modes.Power_CV:
                     {
                         if (value != null)
                         {
-                            this.name = "Constant resistance " + ((double)value).ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Constant power (CV) " + ((double)value).ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
                         }
                         else
                         {
-                            this.name = "Constant resistance (use previous), " + durationString + " " + timeUnit.ToString();
+                            this.name = "Constant power (CV, use previous), " + durationString + " " + timeUnit.ToString();
+                        }
+                        break;
+                    }
+                case Modes.Resistance_CC:
+                    {
+                        if (value != null)
+                        {
+                            this.name = "Constant resistance (CC) " + ((double)value).ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                        }
+                        else
+                        {
+                            this.name = "Constant resistance (CC, use previous), " + durationString + " " + timeUnit.ToString();
+                        }
+                        break;
+                    }
+                case Modes.Resistance_CV:
+                    {
+                        if (value != null)
+                        {
+                            this.name = "Constant resistance (CV) " + ((double)value).ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                        }
+                        else
+                        {
+                            this.name = "Constant resistance (CV, use previous), " + durationString + " " + timeUnit.ToString();
                         }
                         break;
                     }
@@ -169,27 +193,51 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power:
+                case Modes.Power_CC:
                     {
                         if (startingValue != null)
                         {
-                            this.name = "Ramp power " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Ramp power (CC) " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
                         }
                         else
                         {
-                            this.name = "Ramp power (use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Ramp power (CC, use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
                         }
                         break;
                     }
-                case Modes.Resistance:
+                case Modes.Power_CV:
                     {
                         if (startingValue != null)
                         {
-                            this.name = "Ramp resistance " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Ramp power (CV) " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
                         }
                         else
                         {
-                            this.name = "Ramp resistance (use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                            this.name = "Ramp power (CV, use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " W, " + durationString + " " + timeUnit.ToString();
+                        }
+                        break;
+                    }
+                case Modes.Resistance_CC:
+                    {
+                        if (startingValue != null)
+                        {
+                            this.name = "Ramp resistance (CC) " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                        }
+                        else
+                        {
+                            this.name = "Ramp resistance (CC, use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                        }
+                        break;
+                    }
+                case Modes.Resistance_CV:
+                    {
+                        if (startingValue != null)
+                        {
+                            this.name = "Ramp resistance (CV) " + ((double)startingValue).ToString(NUMBER_FORMAT) + " –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
+                        }
+                        else
+                        {
+                            this.name = "Ramp resistance (CV, use previous) –> " + finalValue.ToString(NUMBER_FORMAT) + " Ω, " + durationString + " " + timeUnit.ToString();
                         }
                         break;
                     }
@@ -245,7 +293,8 @@ namespace MightyWatt
                         break;
                     }
                 case Modes.MPPT:
-                case Modes.Power:
+                case Modes.Power_CC:
+                case Modes.Power_CV:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
@@ -258,7 +307,8 @@ namespace MightyWatt
                         this.name += skipValue.ToString(NUMBER_FORMAT) + " W";
                         break;
                     }
-                case Modes.Resistance:
+                case Modes.Resistance_CC:
+                case Modes.Resistance_CV:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
