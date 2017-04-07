@@ -25,6 +25,7 @@
 #include "Measurement.h"
 #include "Thermometer.h"
 #include "RangeSwitcher.h"
+#include "Flashreader.h"
 #include "MightyWatt.h"
 
 /* </Includes> */
@@ -41,6 +42,11 @@ static uint8_t measurementMessage[COMMUNICATION_MEASUREMENT_MESSAGE_LENGTH];
 static const Measurement_Values * measurementValues;
 static const TSCUChar * temperature;
 static char textMessage[64];
+
+static const char Name[] FLASHMEMORY = NAME;
+static const char CalibrationDate[] FLASHMEMORY = CALIBRATION_DATE;
+static const char FirmwareVersion[] FLASHMEMORY = FIRMWARE_VERSION;
+static const char BoardRevision[] FLASHMEMORY = BOARD_REVISION;
 
 /* </Module variables> */
 
@@ -179,13 +185,17 @@ void Communication_Send(void)
     switch (readCommand.command)
     {
       case ReadCommand_IDN:
-        SerialPort.println(NAME);
+        Flashreader_Read((uint8_t*)textMessage, (uint8_t*)Name, sizeof(Name)/sizeof(Name[0]));
+        SerialPort.println(textMessage);
         lastSent = readCommand.commandCounter;
         break;
       case ReadCommand_QDC:      
-        SerialPort.println(CALIBRATION_DATE);
-        SerialPort.println(FIRMWARE_VERSION);
-        SerialPort.println(BOARD_REVISION);
+        Flashreader_Read((uint8_t*)textMessage, (uint8_t*)CalibrationDate, sizeof(CalibrationDate)/sizeof(CalibrationDate[0]));
+        SerialPort.println(textMessage);
+        Flashreader_Read((uint8_t*)textMessage, (uint8_t*)FirmwareVersion, sizeof(FirmwareVersion)/sizeof(FirmwareVersion[0]));
+        SerialPort.println(textMessage);
+        Flashreader_Read((uint8_t*)textMessage, (uint8_t*)BoardRevision, sizeof(BoardRevision)/sizeof(BoardRevision[0]));
+        SerialPort.println(textMessage);
         SerialPort.println(CURRENT_SETTER_MAXIMUM_HICURRENT);
         SerialPort.println(AMMETER_MAXIMUM_CURRENT);
         SerialPort.println(VOLTAGE_SETTER_MAXIMUM_HIVOLTAGE);

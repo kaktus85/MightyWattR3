@@ -21,7 +21,7 @@
 #include "Thermometer.h"
 #include "VoltageSetter.h"
 #include "Voltmeter.h"
-
+#include "Flashreader.h"
 #include "ErrorMessaging.h"
 
 #include "Arduino.h"
@@ -67,6 +67,35 @@ const char * ErrorMessaging_ErrorNames[] =
   Communication_CommandTimeout, CurrentSetter_SetCurrentOverload, DACC_Overload, DACC_UpperLimitReached, DACC_LowerLimitReached,
   Limiter_CurrentOverload, Limiter_VoltageOverload, Limiter_PowerOverload, Limiter_SOAExceeded, Limiter_Overheat, Limiter_HardwareFault,
   Measurement_Invalid, Thermometer_HardwareFault, VoltageSetter_SetVoltageOverload, Voltmeter_VoltageOverload, Voltmeter_NegativeVoltage
+};
+
+const uint8_t ErrorMessaging_ErrorSizes[] =
+{
+  sizeof(ADC_Overload) / sizeof(char),
+  sizeof(ADC_NotResponding) / sizeof(char),
+  sizeof(ADS1x15_ResultNotReady) / sizeof(char),
+  sizeof(AD569xR_Overload) / sizeof(char),
+  sizeof(Ammeter_CurrentOverload) / sizeof(char),
+  sizeof(Ammeter_NegativeCurrent) / sizeof(char),
+  
+  sizeof(Communication_CommandTimeout) / sizeof(char),
+  sizeof(CurrentSetter_SetCurrentOverload) / sizeof(char),
+  sizeof(DACC_Overload) / sizeof(char),
+  sizeof(DACC_UpperLimitReached) / sizeof(char),
+  sizeof(DACC_LowerLimitReached) / sizeof(char),
+  
+  sizeof(Limiter_CurrentOverload) / sizeof(char),
+  sizeof(Limiter_VoltageOverload) / sizeof(char),
+  sizeof(Limiter_PowerOverload) / sizeof(char),
+  sizeof(Limiter_SOAExceeded) / sizeof(char),
+  sizeof(Limiter_Overheat) / sizeof(char),
+  sizeof(Limiter_HardwareFault) / sizeof(char),
+  
+  sizeof(Measurement_Invalid) / sizeof(char),
+  sizeof(Thermometer_HardwareFault) / sizeof(char),
+  sizeof(VoltageSetter_SetVoltageOverload) / sizeof(char),
+  sizeof(Voltmeter_VoltageOverload) / sizeof(char),
+  sizeof(Voltmeter_NegativeVoltage) / sizeof(char)
 };
 
 static const ErrorMessaging_Error * AD569xRError;
@@ -256,20 +285,7 @@ uint8_t ErrorMessaging_ErrorNamesCount(void)
 
 void ErrorMessaging_GetError(uint8_t errorNumber, char * message)
 {
-  uint16_t i = 0;  
-  
-  do
-  {
-    #ifdef UNO
-      message[i] = pgm_read_byte(&(ErrorMessaging_ErrorNames[errorNumber])[i]);
-    #elif defined(ZERO)
-      message[i] = (ErrorMessaging_ErrorNames[errorNumber])[i];
-    #else
-      #error No platform defined
-    #endif
-    i++;
-  }
-  while(message[i - 1] != 0);
+  Flashreader_Read((uint8_t*)message, (uint8_t*)(ErrorMessaging_ErrorNames[errorNumber]), ErrorMessaging_ErrorSizes[errorNumber]);
 }
 
 /* </Implementations> */
