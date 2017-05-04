@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace MightyWatt
 {
-    public enum Modes : byte { Current, Voltage, Power_CC, Power_CV, Resistance_CC, Resistance_CV, VoltageSoftware, MPPT };
+    public enum Modes : byte { Current, Voltage, Power_CC, Power_CV, Resistance_CC, Resistance_CV, VoltageSoftware, MPPT, SimpleAmmeter };
     public enum TimeUnits : byte { ms, s, min, h }
     public enum Comparison { LessThan, MoreThan }
     public enum ProgramModes : byte { Constant, Ramp };
@@ -42,8 +42,9 @@ namespace MightyWatt
         public int TotalLoops { get; set; } // total number of loops, 0 for infinite
 
         // GUI
-        public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker" };
-        public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V"};
+        public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker", "Simple ammeter" };
+        public static readonly string[] ModeNamesWatchdogAndSkip = { "Current", "Voltage", "Power", "Power", "Resistance", "Resistance", "Voltage", "Voltage", "Current" };
+        public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V", ""};
         DateTime lastGuiUpdate = DateTime.Now;
         private double guiUpdatePeriod = 0.2;
         public event GuiUpdateDelegate GuiUpdateEvent;
@@ -70,7 +71,7 @@ namespace MightyWatt
         private DateTime lastProgramLog = DateTime.MinValue;
 
         // minimum firmware version
-        public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 0 };
+        public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 1 };
 
         // LED, fan, measurements filter and autoranging settings
         public const LEDBrightnesses DefaultLEDBrightness = LEDBrightnesses.Medium;
@@ -404,6 +405,7 @@ namespace MightyWatt
             switch (mode)
             {
                 case Modes.Current:
+                case Modes.SimpleAmmeter:
                     {
                         return (comparator == Comparison.LessThan) == (Current < value);
                     }

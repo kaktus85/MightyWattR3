@@ -160,6 +160,11 @@ namespace MightyWatt
 
                         break;
                     }
+                case Modes.SimpleAmmeter:
+                    {
+                        name = "Simple ammeter, " + durationString + " " + timeUnit.ToString();
+                        break;
+                    }
             }
         }
 
@@ -280,6 +285,7 @@ namespace MightyWatt
             switch (this.skipMode)
             {
                 case Modes.Current:
+                case Modes.SimpleAmmeter:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {

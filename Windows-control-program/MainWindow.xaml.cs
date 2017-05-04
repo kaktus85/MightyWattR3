@@ -355,15 +355,15 @@ namespace MightyWatt
             {
                 comboBoxManualQuantity.Items.Add(Load.ModeNames[i]);
                 comboBoxProgramConstantQuantity.Items.Add(Load.ModeNames[i]);
-                if (i != (int)Modes.MPPT) // do not add MPPT to ramp
+                if ((i != (int)Modes.MPPT) && (i != (int)Modes.SimpleAmmeter)) // do not add MPPT or simple ammeter to ramp
                 {
                     comboBoxProgramRampQuantity.Items.Add(Load.ModeNames[i]);
                 }
-                if (i != (int)Modes.VoltageSoftware && i != (int)Modes.MPPT) // do not add the voltage phase inversion and MPPT to watchdog and skip, use regular voltage or power
+                if (i != (int)Modes.Power_CV && i != (int)Modes.Resistance_CV && i != (int)Modes.VoltageSoftware && i != (int)Modes.MPPT && i != (int)Modes.SimpleAmmeter) // do not add the CV software modes, MPPT and simple ammeter to watchdog and skip, use regular voltage or power
                 {
-                    comboBoxWatchdogQuantity.Items.Add(Load.ModeNames[i]);
-                    comboBoxProgramConstantSkipQuantity.Items.Add(Load.ModeNames[i]);
-                    comboBoxProgramRampSkipQuantity.Items.Add(Load.ModeNames[i]);
+                    comboBoxWatchdogQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
+                    comboBoxProgramConstantSkipQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
+                    comboBoxProgramRampSkipQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
                 }
             }
 

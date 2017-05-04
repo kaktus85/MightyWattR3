@@ -12,7 +12,7 @@ namespace MightyWatt
     public delegate void DataUpdateDelegate();
     public delegate void ConnectionUpdateDelegate();
     public enum ReadCommands : byte { Measurement = 1, IDN = 2, QDC = 3, ErrorMessages = 4 };
-    public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPowerCC = 3, ConstantPowerCV = 4, ConstantResistanceCC = 5, ConstantResistanceCV = 6, ConstantVoltageSoftware = 7, MPPT = 8,
+    public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPowerCC = 3, ConstantPowerCV = 4, ConstantResistanceCC = 5, ConstantResistanceCV = 6, ConstantVoltageSoftware = 7, MPPT = 8, SimpleAmmeter = 9,
                                        SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15, CurrentRangeAuto = 16, VoltageRangeAuto = 17};
 
     class Communication
@@ -64,7 +64,7 @@ namespace MightyWatt
         private bool remote;
 
         // DEBUG
-        private int crcFails = 0;
+        //private int crcFails = 0;
 
         public Communication()
         {
@@ -388,7 +388,14 @@ namespace MightyWatt
             if (port.IsOpen)
             {
                 validateValues(mode, value); // validate input
-                dataItem = new byte[5];
+                if (mode == Modes.SimpleAmmeter)
+                {
+                    dataItem = new byte[1];
+                }
+                else
+                {
+                    dataItem = new byte[5];
+                }
 
                 dataItem[0] = COMMUNICATION_WRITE;
                 for (byte i = 0; i < dataStageLength.Length; i++)
@@ -400,7 +407,7 @@ namespace MightyWatt
                     }
                 }
 
-                UInt32 val;
+                UInt32 val = 0;
                 switch (mode)
                 {
                     case Modes.Current:
@@ -430,19 +437,22 @@ namespace MightyWatt
                     case Modes.Resistance_CC:
                         val = Convert.ToUInt32(value * 1000);
                         dataItem[0] |= (byte)WriteCommands.ConstantResistanceCC;
-                        break;                    
+                        break;
                     case Modes.Resistance_CV:
                         val = Convert.ToUInt32(value * 1000);
                         dataItem[0] |= (byte)WriteCommands.ConstantResistanceCV;
+                        break;
+                    case Modes.SimpleAmmeter:                        
+                        dataItem[0] |= (byte)WriteCommands.SimpleAmmeter;
                         break;
                     default:
                         return;
                 }
 
-                dataItem[1] = Convert.ToByte(val & 0xFF);
-                dataItem[2] = Convert.ToByte((val >> 8) & 0xFF);
-                dataItem[3] = Convert.ToByte((val >> 16) & 0xFF);
-                dataItem[4] = Convert.ToByte((val >> 24) & 0xFF);
+                for (byte i = 1; i < dataItem.Length; i++)
+                {
+                    dataItem[i] = Convert.ToByte((val >> (8 * (i - 1))) & 0xFF);
+                }
 
                 dataToWrite.Enqueue(dataItem);
             }
@@ -514,6 +524,9 @@ namespace MightyWatt
                             }
                             break;
                         }
+                    case Modes.SimpleAmmeter:
+                        // No validation
+                        break;
                     default:
                         {
                             throw new System.IO.InvalidDataException("Invalid input");
@@ -534,6 +547,7 @@ namespace MightyWatt
             switch (mode)
             {
                 case Modes.Current:
+                case Modes.SimpleAmmeter:
                 /*case Modes.MPPT:*/
                     {
                         return current;
