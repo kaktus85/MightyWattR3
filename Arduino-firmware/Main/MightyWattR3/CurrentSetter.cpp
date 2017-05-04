@@ -158,6 +158,14 @@ void CurrentSetter_Minus(uint32_t value)
   }
 }
 
+void CurrentSetter_SetMaxCurrentThisRange(void)
+{
+  /* Set maximum DAC */
+  DACC_SetVoltage(DAC_MAXIMUM);
+  /* Set phase CC with autoranging for ammeter */
+  Control_SetCCCV(Control_CCCV_CC_SimpleAmmeter);
+}
+
 uint32_t CurrentSetter_GetCurrent(void)
 {
   return presentCurrent;

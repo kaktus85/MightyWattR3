@@ -130,6 +130,12 @@ void Control_SetMPPT(void);
  */
 void Control_KeepMPPT(void);
 
+/*
+ * Sets the maximum current at the present range
+ * Used for simple ammeter
+ */
+void Control_SetMaxCurrent(void);
+
 /**
  * Increases step size for CC software-controlled modes
  * Checks and maintains maximum step size
@@ -255,6 +261,10 @@ void Control_Do(void)
         Control_SetMPPT();
         Control_Keep = &Control_KeepMPPT;     
       break;
+      case WriteCommand_SimpleAmmeter:
+        Control_SetMaxCurrent();
+        Control_Keep = NULL; // No keeper necessary
+      break;      
       default:
       /* command handled by other modules */
       break;
@@ -771,6 +781,11 @@ void Control_KeepMPPT(void)
 //  CurrentSetter_Do();  
 //}
 
+void Control_SetMaxCurrent(void)
+{
+  CurrentSetter_SetMaxCurrentThisRange();
+}
+
 void Control_SetCCCV(Control_CCCVStates state)
 {
   switch (state)
@@ -781,6 +796,10 @@ void Control_SetCCCV(Control_CCCVStates state)
     break;
     case Control_CCCV_CV:
       digitalWrite(CONTROL_CCCV_PIN, HIGH);
+      cccvState = state;
+    break;
+    case Control_CCCV_CC_SimpleAmmeter:
+      digitalWrite(CONTROL_CCCV_PIN, LOW);
       cccvState = state;
     break;
     default:

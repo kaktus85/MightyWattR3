@@ -46,7 +46,8 @@
 enum Control_CCCVStates : uint8_t
 {
   Control_CCCV_CC,
-  Control_CCCV_CV
+  Control_CCCV_CV,
+  Control_CCCV_CC_SimpleAmmeter,
 };
 
 enum Control_CurrentActions : uint8_t

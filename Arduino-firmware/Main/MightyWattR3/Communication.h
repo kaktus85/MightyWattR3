@@ -53,6 +53,7 @@ enum Communication_WriteCommands : uint8_t
   WriteCommand_ConstantResistanceCV = 6,
   WriteCommand_ConstantVoltageSoftware = 7,
   WriteCommand_MPPT = 8,
+  WriteCommand_SimpleAmmeter = 9,
   WriteCommand_SeriesResistance = 10,
   WriteCommand_4Wire = 11,
   WriteCommand_MeasurementSpeed = 12,

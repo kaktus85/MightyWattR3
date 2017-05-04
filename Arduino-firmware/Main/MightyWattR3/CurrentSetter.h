@@ -71,6 +71,11 @@ void CurrentSetter_Plus(uint32_t value);
 void CurrentSetter_Minus(uint32_t value);
 
 /**
+ * Sets the maximum possible current at the present range (does not manipulate current range)
+ */
+void CurrentSetter_SetMaxCurrentThisRange(void);
+
+/**
  * Returns the current that is supposed to be set
  *
  * @return - Current that is set at the moment
