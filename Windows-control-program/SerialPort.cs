@@ -684,39 +684,42 @@ namespace MightyWatt
 
         public COMPortInfo() { }
 
-        public static List<COMPortInfo> GetCOMPortsInfo()
+        public static Task<List<COMPortInfo>> GetCOMPortsInfoAsync()
         {
-            List<COMPortInfo> comPortInfoList = new List<COMPortInfo>();
-
-            ConnectionOptions options = ProcessConnection.ProcessConnectionOptions();
-            ManagementScope connectionScope = ProcessConnection.ConnectionScope(Environment.MachineName, options, @"\root\CIMV2");
-
-            ObjectQuery objectQuery = new ObjectQuery("SELECT * FROM Win32_PnPEntity WHERE ConfigManagerErrorCode = 0");
-            ManagementObjectSearcher comPortSearcher = new ManagementObjectSearcher(connectionScope, objectQuery);
-
-            using (comPortSearcher)
+            return Task.Run(() =>
             {
-                string caption = null;
-                foreach (ManagementObject obj in comPortSearcher.Get())
+                List<COMPortInfo> comPortInfoList = new List<COMPortInfo>();
+
+                ConnectionOptions options = ProcessConnection.ProcessConnectionOptions();
+                ManagementScope connectionScope = ProcessConnection.ConnectionScope(Environment.MachineName, options, @"\root\CIMV2");
+
+                ObjectQuery objectQuery = new ObjectQuery("SELECT * FROM Win32_PnPEntity WHERE ConfigManagerErrorCode = 0");
+                ManagementObjectSearcher comPortSearcher = new ManagementObjectSearcher(connectionScope, objectQuery);
+
+                using (comPortSearcher)
                 {
-                    if (obj != null)
+                    string caption = null;
+                    foreach (ManagementObject obj in comPortSearcher.Get())
                     {
-                        object captionObj = obj["Caption"];
-                        if (captionObj != null)
+                        if (obj != null)
                         {
-                            caption = captionObj.ToString();
-                            if (caption.Contains("(COM"))
+                            object captionObj = obj["Caption"];
+                            if (captionObj != null)
                             {
-                                COMPortInfo comPortInfo = new COMPortInfo();
-                                comPortInfo.Name = caption.Substring(caption.LastIndexOf("(COM")).Replace("(", string.Empty).Replace(")", string.Empty).Trim();
-                                comPortInfo.Description = caption.Trim();
-                                comPortInfoList.Add(comPortInfo);
+                                caption = captionObj.ToString();
+                                if (caption.Contains("(COM"))
+                                {
+                                    COMPortInfo comPortInfo = new COMPortInfo();
+                                    comPortInfo.Name = caption.Substring(caption.LastIndexOf("(COM")).Replace("(", string.Empty).Replace(")", string.Empty).Trim();
+                                    comPortInfo.Description = caption.Trim();
+                                    comPortInfoList.Add(comPortInfo);
+                                }
                             }
                         }
                     }
                 }
-            }
-            return comPortInfoList;
+                return comPortInfoList;
+            });
         }
     }
 }

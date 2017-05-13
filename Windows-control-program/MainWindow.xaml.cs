@@ -27,6 +27,7 @@ namespace MightyWatt
         private bool watchdogMessageShowingEnabled = true, seriesResistanceWatchdogMessageShowingEnabled = true;
         private string statusBarConnectionString = "Not connected";
         private Statistics statisticsWindow;
+        private bool COMMenuInstanceRunning = false;
 
         // bindings
         List<BindingExpression> bindingExpressions;
@@ -79,7 +80,7 @@ namespace MightyWatt
             menuItemPlot15m.Tag = PlotTimeSpan.m15;
             menuItemPlot4h.Tag = PlotTimeSpan.h4;
             menuItemPlot1d.Tag = PlotTimeSpan.d1;
-            menuItemPlot7d.Tag = PlotTimeSpan.d7;            
+            menuItemPlot7d.Tag = PlotTimeSpan.d7;
         }
 
         // disconnects load when the program exits
@@ -418,7 +419,7 @@ namespace MightyWatt
         }
 
         // finds the currently connected port and matches it with its text description from WMI query; then updates the status bar with connection information
-        private void connectionUpdated()
+        private async void connectionUpdated()
         {
             if (load.IsConnected == false)
             {
@@ -427,7 +428,8 @@ namespace MightyWatt
             }
             else
             {
-                foreach (COMPortInfo comPortInfo in COMPortInfo.GetCOMPortsInfo())
+                List<COMPortInfo> comPortInfoList = await COMPortInfo.GetCOMPortsInfoAsync();
+                foreach (COMPortInfo comPortInfo in comPortInfoList)
                 {
                     if (comPortInfo.Name == load.PortName)
                     {
@@ -603,6 +605,46 @@ namespace MightyWatt
                         default:
                             break;
                     }
+                }
+            }
+        }
+
+        // Asynchronously fills COM port menu
+        private async void FillCOMPortMenu()
+        {
+            if (!COMMenuInstanceRunning)
+            {
+                COMMenuInstanceRunning = true;
+                MenuItem[] item;
+                List<COMPortInfo> comPortInfoList = await COMPortInfo.GetCOMPortsInfoAsync();
+                menuItemConnectionUno.Items.Clear(); // clears the menu
+                menuItemConnectionZero.Items.Clear(); // clears the menu
+                foreach (COMPortInfo comPort in comPortInfoList)
+                {
+                    item = new MenuItem[2];
+                    item[0] = new MenuItem();
+                    item[1] = new MenuItem();
+                    item[0].Header = comPort.Description;
+                    item[1].Header = comPort.Description;
+                    item[0].Tag = Boards.Zero;
+                    item[1].Tag = Boards.Uno;
+                    item[0].IsCheckable = true;
+                    item[1].IsCheckable = true;
+                    if (comPort.Name == load.PortName)
+                    {
+                        item[0].IsChecked = true;
+                        item[1].IsChecked = true;
+                    }
+                    else
+                    {
+                        item[0].IsChecked = false;
+                        item[1].IsChecked = false;
+                    }
+                    menuItemConnectionZero.Items.Add(item[0]);
+                    menuItemConnectionUno.Items.Add(item[1]);
+                    item[0].AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(menuItemConnection_Click));
+                    item[1].AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(menuItemConnection_Click));
+                    COMMenuInstanceRunning = false;
                 }
             }
         }
@@ -931,7 +973,7 @@ namespace MightyWatt
                 {
                     load.MeasurementFilter = MeasurementFilters.UnfilteredNoADCAutoranging;
                 }
-            }            
+            }
         }
 
         public bool MeasurementFilterUnfiltered
@@ -972,7 +1014,7 @@ namespace MightyWatt
             }
             set
             {
-                load.AutorangingCurrent = value;                
+                load.AutorangingCurrent = value;
             }
         }
 
@@ -1011,34 +1053,8 @@ namespace MightyWatt
         {
             menuItemConnectionUno.Items.Clear(); // clears the menu
             menuItemConnectionZero.Items.Clear(); // clears the menu
-            MenuItem[] item;
-            foreach (COMPortInfo comPort in COMPortInfo.GetCOMPortsInfo())
-            {
-                item = new MenuItem[2];
-                item[0] = new MenuItem();
-                item[1] = new MenuItem();
-                item[0].Header = comPort.Description;
-                item[1].Header = comPort.Description;
-                item[0].Tag = Boards.Zero;
-                item[1].Tag = Boards.Uno;
-                item[0].IsCheckable = true;
-                item[1].IsCheckable = true;
-                if (comPort.Name == load.PortName)
-                {                    
-                    item[0].IsChecked = true;
-                    item[1].IsChecked = true;
-                }
-                else
-                {
-                    item[0].IsChecked = false;
-                    item[1].IsChecked = false;
-                }
-                menuItemConnectionZero.Items.Add(item[0]);
-                menuItemConnectionUno.Items.Add(item[1]);                
-                item[0].AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(menuItemConnection_Click));
-                item[1].AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(menuItemConnection_Click));
-            }
-        }
+            FillCOMPortMenu();
+        }        
 
         // connect to or disconnect from selected COM port, without invoking WMI
         private void menuItemConnection_Click(object sender, RoutedEventArgs e)
@@ -1046,15 +1062,6 @@ namespace MightyWatt
             string selectedPort = string.Empty;
             selectedPort = ((MenuItem)sender).Header.ToString().Substring(((MenuItem)sender).Header.ToString().LastIndexOf("(COM")).Replace("(", string.Empty).Replace(")", string.Empty).Trim();
             Boards selectedBoard = (Boards)(((MenuItem)sender).Tag);
-
-            //foreach (MenuItem menuItem in menuItemConnection.Items)
-            //{
-            //    if (menuItem.Equals(sender))
-            //    {
-            //        selectedPort = menuItem.Header.ToString().Substring(menuItem.Header.ToString().LastIndexOf("(COM")).Replace("(", string.Empty).Replace(")", string.Empty).Trim();
-            //        break;
-            //    }
-            //}
 
             if (selectedPort == load.PortName)
             {
