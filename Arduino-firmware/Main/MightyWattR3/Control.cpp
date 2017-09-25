@@ -955,11 +955,11 @@ void Control_SWCC(uint32_t setValue, uint32_t * lastValue, uint32_t presentValue
   /* Perform the computed action */
   if (action == Control_CurrentDown)
   {
-    CurrentSetter_Minus(stepSize);
+    CurrentSetter_Minus(((uint64_t)stepSize * lastDifference) / setValue);
   }
   else
   {
-    CurrentSetter_Plus(stepSize);
+    CurrentSetter_Plus(((uint64_t)stepSize * lastDifference) / setValue);
   }    
   
   /* Assign last values */
