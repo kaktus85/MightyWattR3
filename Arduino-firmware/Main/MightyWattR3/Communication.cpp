@@ -249,7 +249,7 @@ void Communication_Send(void)
           {
             statusFlag |= 1 << 3;
           }
-          if (Fan_Get()) /* Bit 4: Fan on */
+          if (Fan_Get() == Fan_On) /* Bit 4: Fan on */
           {
             statusFlag |= 1 << 4;
           }
