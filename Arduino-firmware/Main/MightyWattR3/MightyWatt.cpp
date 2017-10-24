@@ -13,8 +13,10 @@
 #include "ADC.h"
 #include "DACC.h"
 #include "LED.h"
+#include "Pin.h"
 #include "Fan.h"
 #include "LEDController.h"
+#include "PinController.h"
 #include "FanController.h"
 #include "Voltmeter.h"
 #include "Ammeter.h"
@@ -39,6 +41,7 @@ void MightyWatt_Init(void)
   ADC_Init();
   DACC_Init();
   LED_Init();
+  Pin_Init();
   Fan_Init();
   RangeSwitcher_Init();
   Voltmeter_Init();  
@@ -49,6 +52,7 @@ void MightyWatt_Init(void)
   Measurement_Init();
   Control_Init();
   LEDController_Init();
+  PinController_Init();
   FanController_Init();
   Limiter_Init();
   ErrorMessaging_Init();
@@ -66,6 +70,7 @@ void MightyWatt_Do(void)
   RangeSwitcher_Do();
   Control_Do();
   LEDController_Do();
+  PinController_Do();
   FanController_Do();
   Limiter_Do();  
   CommunicationWatchdog_Do();

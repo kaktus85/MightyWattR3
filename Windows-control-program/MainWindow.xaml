@@ -82,6 +82,15 @@
                     <Separator/>
                     <MenuItem Header="Close plot" Name="menuItemPlotClose" Click="menuItemPlotClose_Click"/>
                 </MenuItem>
+                <MenuItem Header="User pins" DataContext="{Binding load}">
+                    <MenuItem Header="Arduino pin 2" IsCheckable="True" IsChecked="{Binding UserPin0, Mode=TwoWay}"/>
+                    <MenuItem Header="Arduino pin 6" IsCheckable="True" IsChecked="{Binding UserPin1, Mode=TwoWay}"/>
+                    <MenuItem Header="Arduino pin 7" IsCheckable="True" IsChecked="{Binding UserPin2, Mode=TwoWay}"/>
+                    <MenuItem Header="Arduino pin 10" IsCheckable="True" IsChecked="{Binding UserPin3, Mode=TwoWay}"/>
+                    <MenuItem Header="Arduino pin 13" IsCheckable="True" IsChecked="{Binding UserPin4, Mode=TwoWay}"/>
+                    <Separator></Separator>
+                    <MenuItem Header="Reset all" Click="MenuItemToolsUserPinsResetAll_Click"/>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Help" Name="menuItemHelp">
                 <MenuItem Header="Device Info" Name="menuItemDeviceInfo" Click="menuItemDeviceInfo_Click"></MenuItem>

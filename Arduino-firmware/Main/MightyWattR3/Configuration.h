@@ -33,6 +33,7 @@
 
 /* Calibration */
 
+#define SN                        "SN000" /* Serial number */
 #define CALIBRATION_DATE 					"2017-04-07"
 
 #define CURRENTSETTER_SLOPE_HI 				25109413L

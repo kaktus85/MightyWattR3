@@ -13,10 +13,12 @@ namespace MightyWatt
     public delegate void ConnectionUpdateDelegate();
     public enum ReadCommands : byte { Measurement = 1, IDN = 2, QDC = 3, ErrorMessages = 4 };
     public enum WriteCommands : byte { ConstantCurrent = 1, ConstantVoltage = 2, ConstantPowerCC = 3, ConstantPowerCV = 4, ConstantResistanceCC = 5, ConstantResistanceCV = 6, ConstantVoltageSoftware = 7, MPPT = 8, SimpleAmmeter = 9,
-                                       SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15, CurrentRangeAuto = 16, VoltageRangeAuto = 17};
+                                       SeriesResistance = 10, FourWire = 11, MeasurementFilter = 12, FanRules = 13, LEDRules = 14, LEDBrightness = 15, CurrentRangeAuto = 16, VoltageRangeAuto = 17, UserPins = 18};
 
-    class Communication
+    class Communication : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         // COM port
         private SerialPort port;
         private const Parity parity = Parity.None;
@@ -33,7 +35,7 @@ namespace MightyWatt
 
         // communication        
         private const UInt16 COMMUNICATION_CRC_POLYNOMIAL_VALUE = 0x1021;
-        private const byte measurementMessageLength = 16; // 14 bytes of data + 2 bytes CRC
+        private const byte measurementMessageLength = 17; // 15 bytes of data + 2 bytes CRC
         private const byte COMMUNICATION_READ = (0 << 7);
         private const byte COMMUNICATION_WRITE = (1 << 7);
         private readonly byte[] dataStageLength = new byte[] { 0, 1, 2, 4 }; // Length of payload
@@ -62,6 +64,7 @@ namespace MightyWatt
         UInt32 errorFlags;
         private double seriesResistance;
         private bool remote;
+        private byte userPins;
 
         // DEBUG
         //private int crcFails = 0;
@@ -158,6 +161,7 @@ namespace MightyWatt
             voltage = 0;            
             temperature = 0;
             status = 0;
+            UserPins = 0;
             errorFlags = 0;
             seriesResistance = 0;           
 
@@ -165,6 +169,7 @@ namespace MightyWatt
             activePortName = null;
             firmwareVersion = null;
             boardRevision = null;
+            DeviceIdentification = string.Empty;
             maxIdac = 0;
             maxIadc = 0;
             maxVdac = 0;
@@ -268,7 +273,7 @@ namespace MightyWatt
                 {
                     // check CRC
                     ushort crc = CRC16(COMMUNICATION_CRC_POLYNOMIAL_VALUE, newData, measurementMessageLength - 2);
-                    if (crc != Convert.ToUInt16((newData[14] | (newData[15] << 8)) & 0xFFFF))
+                    if (crc != Convert.ToUInt16((newData[15] | (newData[16] << 8)) & 0xFFFF))
                     {
                         // CRC check failed, drop data
                         //port.Flush(); // clear stream
@@ -288,8 +293,9 @@ namespace MightyWatt
                         temperature = Convert.ToDouble(newData[8]);
                         status = newData[9];
                         remote = Flag(status, 5);
+                        UserPins = newData[10];
 
-                        errorFlags |= ((UInt32)newData[10] | ((UInt32)newData[11] << 8) | ((UInt32)newData[12] << 16) | ((UInt32)newData[13] << 24)) & errorMask; // only add to error flags
+                        errorFlags |= ((UInt32)newData[11] | ((UInt32)newData[12] << 8) | ((UInt32)newData[13] << 16) | ((UInt32)newData[14] << 24)) & errorMask; // only add to error flags
 
                         return true;
                     }
@@ -306,10 +312,20 @@ namespace MightyWatt
             {
                 Query((byte)ReadCommands.IDN);
                 string response = port.ReadLine();
-                return response.Contains(IdentificationString);
+                if (response.Contains(IdentificationString))
+                {
+                    DeviceIdentification = response;
+                    return true;
+                }                
+                else
+                {
+                    DeviceIdentification = string.Empty;
+                    return false;
+                }
             }
             catch (Exception)
             {
+                DeviceIdentification = string.Empty;
                 return false;
             }
         }
@@ -692,6 +708,11 @@ namespace MightyWatt
             return crc;
         }
 
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public MeasurementValues PresentValues
         {
             get
@@ -731,6 +752,9 @@ namespace MightyWatt
                 return boardRevision;
             }
         }
+
+        // Identification string as returned from the device
+        public string DeviceIdentification { get; private set; }
 
         public double MaxIdac
         {
@@ -819,6 +843,23 @@ namespace MightyWatt
                 data[1] = Convert.ToByte(value);
                 dataToWrite.Enqueue(data);
                 remote = value;
+            }
+        }
+
+        // User pins flag word
+        public byte UserPins
+        {
+            get
+            {
+                return userPins;
+            }
+            private set
+            {
+                if (userPins != value)
+                {
+                    userPins = value;
+                    NotifyPropertyChanged(nameof(UserPins));
+                }                
             }
         }
 

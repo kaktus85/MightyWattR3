@@ -17,7 +17,7 @@ namespace MightyWatt
     public partial class MainWindow : Window
     {
         // main components
-        private Load load;
+        public Load load { get; private set; }
         private Xml xmlSettings;
 
         // GUI
@@ -48,9 +48,9 @@ namespace MightyWatt
 
         public MainWindow()
         {
-            InitializeComponent();
-            DataContext = this;
+            InitializeComponent();            
             load = new Load();
+            DataContext = this;
             createBindings();
             fillCombos();
             statisticsWindow = null;
@@ -433,7 +433,7 @@ namespace MightyWatt
                 {
                     if (comPortInfo.Name == load.PortName)
                     {
-                        statusBarConnectionString = "MightyWatt R3 on " + comPortInfo.Description;
+                        statusBarConnectionString = load.DeviceIdentification + " on " + comPortInfo.Description;
                         break;
                     }
                 }
@@ -1281,6 +1281,12 @@ namespace MightyWatt
                     MessageBox.Show(ex.Message, "Cannot read XML file", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
             }
+        }
+
+        // reset all 
+        private void MenuItemToolsUserPinsResetAll_Click(object sender, RoutedEventArgs e)
+        {
+            load.ResetUserPins();
         }
 
         private void StatisticsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

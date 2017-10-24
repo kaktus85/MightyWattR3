@@ -21,7 +21,7 @@
 /* <Defines> */ 
 
 #define NAME                       "MightyWatt R3"
-#define FIRMWARE_VERSION           "3.1.3"
+#define FIRMWARE_VERSION           "3.1.4"
 
 #ifdef UNO
   #include <avr/pgmspace.h>

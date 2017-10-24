@@ -23,8 +23,11 @@ namespace MightyWatt
     public delegate void WatchdogStopDelegate();
     public delegate void ErrorDelegate(string error);    
 
-    public class Load
+    public class Load : INotifyPropertyChanged
     {
+        // events
+        public event PropertyChangedEventHandler PropertyChanged;
+
         // connection
         private Communication device;
         private bool isConnected = false;        
@@ -71,7 +74,7 @@ namespace MightyWatt
         private DateTime lastProgramLog = DateTime.MinValue;
 
         // minimum firmware version
-        public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 1 };
+        public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 4 };
 
         // LED, fan, measurements filter and autoranging settings
         public const LEDBrightnesses DefaultLEDBrightness = LEDBrightnesses.Medium;
@@ -95,7 +98,8 @@ namespace MightyWatt
 
         public Load()
         {
-            this.device = new Communication(); // load over COM port            
+            this.device = new Communication(); // load over COM port         
+            device.PropertyChanged += Device_PropertyChanged;   
 
             device.ConnectionUpdatedEvent += connectionUpdated; // pass connection updated event
             device.DataUpdatedEvent += updateGui; // updates 
@@ -108,6 +112,18 @@ namespace MightyWatt
 
             TotalLoops = 1; // standard single loop
             LoggingTimeUnit = TimeUnits.s; // default unit second
+        }
+
+        private void Device_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Communication.UserPins))
+            {
+                NotifyPropertyChanged(nameof(UserPin0));
+                NotifyPropertyChanged(nameof(UserPin1));
+                NotifyPropertyChanged(nameof(UserPin2));
+                NotifyPropertyChanged(nameof(UserPin3));
+                NotifyPropertyChanged(nameof(UserPin4));
+            }
         }
 
         // connect to selected COM port
@@ -541,6 +557,21 @@ namespace MightyWatt
             FanRule = _FanRule;
         }
 
+        // reset all user pins to zero
+        public void ResetUserPins()
+        {
+            if (isConnected)
+            {
+                device.SetValue(WriteCommands.UserPins, 0);                
+            }
+        }
+
+        // signals that property has changed
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public MeasurementValues PresentValues
         {
             get
@@ -564,6 +595,14 @@ namespace MightyWatt
                 return this.device.PortName;
             }
         }
+
+        public string DeviceIdentification
+        {
+            get
+            {
+                return device.DeviceIdentification;
+            }
+        }            
 
         public double Voltage
         {
@@ -857,6 +896,116 @@ namespace MightyWatt
                 {
                     _AutorangingVoltage = value;
                     device.SetValue(WriteCommands.VoltageRangeAuto, Convert.ToByte(value));
+                }
+            }
+        }
+
+        public bool UserPin0
+        {
+            get
+            {
+                return (device.UserPins & (0x1 << 0)) > 0;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    if (value)
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 0)));
+                    }
+                    else
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 0)));
+                    }
+                }                
+            }
+        }
+
+        public bool UserPin1
+        {
+            get
+            {
+                return (device.UserPins & (0x1 << 1)) > 0;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    if (value)
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 1)));
+                    }
+                    else
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 1)));
+                    }
+                }
+            }
+        }
+
+        public bool UserPin2
+        {
+            get
+            {
+                return (device.UserPins & (0x1 << 2)) > 0;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    if (value)
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 2)));
+                    }
+                    else
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 2)));
+                    }
+                }
+            }
+        }
+
+        public bool UserPin3
+        {
+            get
+            {
+                return (device.UserPins & (0x1 << 3)) > 0;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    if (value)
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 3)));
+                    }
+                    else
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 3)));
+                    }
+                }
+            }
+        }
+
+        public bool UserPin4
+        {
+            get
+            {
+                return (device.UserPins & (0x1 << 4)) > 0;
+            }
+            set
+            {
+                if (isConnected)
+                {
+                    if (value)
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 4)));
+                    }
+                    else
+                    {
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 4)));
+                    }
                 }
             }
         }

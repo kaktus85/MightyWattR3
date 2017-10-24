@@ -28,7 +28,7 @@
 #define COMMUNICATION_COMMAND(x)                        (x & 0x1F)
 #define COMMUNICATION_CRC_POLYNOMIAL_BYTE_LENGTH        2
 #define COMMUNICATION_CRC_POLYNOMIAL_VALUE              0x1021U /* CRC-16 CCITT */
-#define COMMUNICATION_MEASUREMENT_MESSAGE_DATA_LENGTH   14
+#define COMMUNICATION_MEASUREMENT_MESSAGE_DATA_LENGTH   15
 #define COMMUNICATION_MEASUREMENT_MESSAGE_LENGTH        (COMMUNICATION_MEASUREMENT_MESSAGE_DATA_LENGTH + COMMUNICATION_CRC_POLYNOMIAL_BYTE_LENGTH)
 #define COMMUNICATION_READ                              0
 #define COMMUNICATION_WRITE                             1
@@ -62,6 +62,7 @@ enum Communication_WriteCommands : uint8_t
   WriteCommand_LEDBrightness = 15,
   WriteCommand_CurrentRangeAuto = 16,
   WriteCommand_VoltageRangeAuto = 17,
+  WriteCommand_Pins = 18,
 };
 
 /**

@@ -27,6 +27,7 @@
 #include "RangeSwitcher.h"
 #include "Flashreader.h"
 #include "MightyWatt.h"
+#include "PinController.h"
 
 /* </Includes> */
 
@@ -43,7 +44,7 @@ static const Measurement_Values * measurementValues;
 static const TSCUChar * temperature;
 static char textMessage[64];
 
-static const char Name[] FLASHMEMORY = NAME;
+static const char Name[] FLASHMEMORY = NAME " (" SN ")";
 static const char CalibrationDate[] FLASHMEMORY = CALIBRATION_DATE;
 static const char FirmwareVersion[] FLASHMEMORY = FIRMWARE_VERSION;
 static const char BoardRevision[] FLASHMEMORY = BOARD_REVISION;
@@ -257,19 +258,20 @@ void Communication_Send(void)
           {
             statusFlag |= 1 << 5;
           }
-
           measurementMessage[9] = statusFlag;
-          l = ErrorMessaging_GetErrorFlags();
 
-          measurementMessage[10] = l & 0xFF;
-          measurementMessage[11] = (l >> 8) & 0xFF;
-          measurementMessage[12] = (l >> 16) & 0xFF;
-          measurementMessage[13] = (l >> 24) & 0xFF;
+          measurementMessage[10] = PinController_GetPins();
+
+          l = ErrorMessaging_GetErrorFlags();
+          measurementMessage[11] = l & 0xFF;
+          measurementMessage[12] = (l >> 8) & 0xFF;
+          measurementMessage[13] = (l >> 16) & 0xFF;
+          measurementMessage[14] = (l >> 24) & 0xFF;          
 
           // compute CRC of the measurement message body and append it to the end
           crc = CRC16(COMMUNICATION_CRC_POLYNOMIAL_VALUE, (const uint8_t *)measurementMessage, COMMUNICATION_MEASUREMENT_MESSAGE_DATA_LENGTH);
-          measurementMessage[14] = crc & 0xFF;
-          measurementMessage[15] = (crc >> 8) & 0xFF;
+          measurementMessage[15] = crc & 0xFF;
+          measurementMessage[16] = (crc >> 8) & 0xFF;
 
           SerialPort.write(measurementMessage, COMMUNICATION_MEASUREMENT_MESSAGE_LENGTH);
           measurementValuesCounter = measurementValues->counter;
