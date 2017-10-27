@@ -1,7 +1,7 @@
 /**
  * Configuration.h - Arduino setting and calibration constants
  *
- * 2017-04-04
+ * 2017-10-24
  * kaktus circuits
  * GNU GPL v.3
  */
@@ -33,6 +33,7 @@
 
 /* Calibration */
 
+#define SN                        "SN021" /* Serial number */
 #define CALIBRATION_DATE 					"2017-09-17"
 
 #define CURRENTSETTER_SLOPE_HI 				11097607L

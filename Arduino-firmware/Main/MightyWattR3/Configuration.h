@@ -1,7 +1,7 @@
 /**
  * Configuration.h - Arduino setting and calibration constants
  *
- * 2017-04-04
+ * 2017-10-24
  * kaktus circuits
  * GNU GPL v.3
  */
