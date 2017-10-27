@@ -216,6 +216,8 @@ namespace MightyWatt
             bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemSettingsSeriesResistance, MenuItem.IsEnabledProperty));
             menuItemToolsIntegratorsAndStatistics.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
             bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemToolsIntegratorsAndStatistics, MenuItem.IsEnabledProperty));
+            menuItemToolsUserPins.SetBinding(MenuItem.IsEnabledProperty, settingsBinding);
+            bindingExpressions.Add(BindingOperations.GetBindingExpression(menuItemToolsUserPins, MenuItem.IsEnabledProperty));
 
             // manual log checkbox binding
             logManualBinding = new Binding();

@@ -82,7 +82,7 @@
                     <Separator/>
                     <MenuItem Header="Close plot" Name="menuItemPlotClose" Click="menuItemPlotClose_Click"/>
                 </MenuItem>
-                <MenuItem Header="User pins" DataContext="{Binding load}">
+                <MenuItem Header="User pins" DataContext="{Binding load}" Name="menuItemToolsUserPins">
                     <MenuItem Header="Arduino pin 2" IsCheckable="True" IsChecked="{Binding UserPin0, Mode=TwoWay}"/>
                     <MenuItem Header="Arduino pin 6" IsCheckable="True" IsChecked="{Binding UserPin1, Mode=TwoWay}"/>
                     <MenuItem Header="Arduino pin 7" IsCheckable="True" IsChecked="{Binding UserPin2, Mode=TwoWay}"/>
