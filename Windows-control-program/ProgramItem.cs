@@ -42,7 +42,13 @@ namespace MightyWatt
         {
             ramp(mode, startingValue, finalValue, durationString, timeUnit);
             skip(skipMode, skipComparator, skipValue);
-        }        
+        }
+
+        // constructor for pin set
+        public ProgramItem(byte pin, bool set)
+        {
+            UserPin(pin, set);
+        }
 
         // creates constant mode program item
         private void constant(Modes mode, double? value, string durationString, TimeUnits timeUnit)
@@ -273,6 +279,35 @@ namespace MightyWatt
             }
         }
 
+        private void UserPin(byte pin, bool set)
+        {
+            programMode = ProgramModes.Pin;
+            Pin = pin;
+            SetUserPin = set;
+            if (set)
+            {
+                if (pin < Load.Pins.Length)
+                {
+                    name = string.Format("Set {0}", Load.Pins[pin]);
+                }
+                else
+                {
+                    name = "Set all user pins";
+                }
+            }
+            else
+            {
+                if (pin < Load.Pins.Length)
+                {
+                    name = string.Format("Reset {0}", Load.Pins[pin]);
+                }
+                else
+                {
+                    name = "Reset all user pins";
+                }
+            }
+        }
+
         // adds skip condition to program item
         private void skip(Modes skipMode, Comparison skipComparator, double skipValue)
         {
@@ -444,5 +479,8 @@ namespace MightyWatt
                 return this.skipValue;
             }
         }
+
+        public byte Pin { get; private set; }
+        public bool SetUserPin { get; private set; }
     }
 }

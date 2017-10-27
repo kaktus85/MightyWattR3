@@ -118,15 +118,16 @@ namespace MightyWatt
                 programMode.Value = programItem.ProgramMode.ToString();
                 item.Attributes.Append(programMode);
 
-                // parameters                
-                XmlAttribute mode = document.CreateAttribute("mode");
-                mode.Value = programItem.Mode.ToString();
-                item.Attributes.Append(mode);
-
                 switch (programItem.ProgramMode)
                 {
                     case ProgramModes.Constant:                    
                         {
+
+                            // parameters                
+                            XmlAttribute mode = document.CreateAttribute("mode");
+                            mode.Value = programItem.Mode.ToString();
+                            item.Attributes.Append(mode);
+
                             XmlAttribute value = document.CreateAttribute("value");
                             if (programItem.Value == null)
                             {
@@ -137,10 +138,24 @@ namespace MightyWatt
                                 value.Value = programItem.Value.ToString();
                             }
                             item.Attributes.Append(value);
+
+                            XmlAttribute duration = document.CreateAttribute("duration");
+                            duration.Value = programItem.DurationString;
+                            item.Attributes.Append(duration);
+
+                            XmlAttribute timeUnit = document.CreateAttribute("timeUnit");
+                            timeUnit.Value = programItem.TimeUnit.ToString();
+                            item.Attributes.Append(timeUnit);
                             break;
                         }
                     case ProgramModes.Ramp:
                         {
+
+                            // parameters                
+                            XmlAttribute mode = document.CreateAttribute("mode");
+                            mode.Value = programItem.Mode.ToString();
+                            item.Attributes.Append(mode);
+
                             XmlAttribute startingValue = document.CreateAttribute("startingValue");
                             if (programItem.StartingValue == null)
                             {
@@ -155,17 +170,28 @@ namespace MightyWatt
                             XmlAttribute finalValue = document.CreateAttribute("finalValue");
                             finalValue.Value = programItem.FinalValue.ToString();
                             item.Attributes.Append(finalValue);
+
+                            XmlAttribute duration = document.CreateAttribute("duration");
+                            duration.Value = programItem.DurationString;
+                            item.Attributes.Append(duration);
+
+                            XmlAttribute timeUnit = document.CreateAttribute("timeUnit");
+                            timeUnit.Value = programItem.TimeUnit.ToString();
+                            item.Attributes.Append(timeUnit);
+                            break;
+                        }
+                    case ProgramModes.Pin:
+                        {
+                            XmlAttribute pinNumber = document.CreateAttribute("pinLogicalNumber");
+                            pinNumber.Value = programItem.Pin < Load.Pins.Length ? programItem.Pin.ToString() : "all";
+                            item.Attributes.Append(pinNumber);
+
+                            XmlAttribute action = document.CreateAttribute("action");
+                            action.Value = programItem.SetUserPin ? "set" : "reset";
+                            item.Attributes.Append(action);
                             break;
                         }
                 }
-
-                XmlAttribute duration = document.CreateAttribute("duration");
-                duration.Value = programItem.DurationString;
-                item.Attributes.Append(duration);
-
-                XmlAttribute timeUnit = document.CreateAttribute("timeUnit");
-                timeUnit.Value = programItem.TimeUnit.ToString();
-                item.Attributes.Append(timeUnit);
 
                 // skip attributes                
                 if (programItem.SkipEnabled)
@@ -294,6 +320,32 @@ namespace MightyWatt
                                 {
                                     programItems.Add(new ProgramItem(mode, startingValue, finalValue, durationString, timeunit));
                                 }
+                                break;
+                            }
+                        case ProgramModes.Pin:
+                            {
+                                // pin number
+                                parameter = item.Attributes.GetNamedItem("pinLogicalNumber");
+                                byte pinNumber;
+                                if (parameter.Value != "all")
+                                {
+                                    pinNumber = byte.Parse(parameter.Value);
+                                }
+                                else
+                                {
+                                    pinNumber = Convert.ToByte(Load.Pins.Length);
+                                }
+
+                                // action
+                                parameter = item.Attributes.GetNamedItem("action");
+                                if (parameter.Value == "set")
+                                {
+                                    programItems.Add(new ProgramItem(pinNumber, true));
+                                }
+                                else if (parameter.Value == "reset")
+                                {
+                                    programItems.Add(new ProgramItem(pinNumber, false));
+                                }                             
                                 break;
                             }
                     }

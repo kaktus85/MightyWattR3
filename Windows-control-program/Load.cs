@@ -12,7 +12,7 @@ namespace MightyWatt
     public enum Modes : byte { Current, Voltage, Power_CC, Power_CV, Resistance_CC, Resistance_CV, VoltageSoftware, MPPT, SimpleAmmeter };
     public enum TimeUnits : byte { ms, s, min, h }
     public enum Comparison { LessThan, MoreThan }
-    public enum ProgramModes : byte { Constant, Ramp };
+    public enum ProgramModes : byte { Constant, Ramp, Pin };
     public enum Boards : byte { Zero, Uno };
     public enum LEDBrightnesses : byte { Off = 0, Low = 23, Medium = 105, High = 255 }; // Pre-defined brightness levels using 2.2 gamma correction
     public enum LEDRules : byte { AlwaysOff = 0, P1 = 1, V1 = 2, I1 = 4, P10 = 8, V10 = 16, I10 = 32, T50 = 64, AlwaysOn = 128 };
@@ -48,6 +48,7 @@ namespace MightyWatt
         public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker", "Simple ammeter" };
         public static readonly string[] ModeNamesWatchdogAndSkip = { "Current", "Voltage", "Power", "Power", "Resistance", "Resistance", "Voltage", "Voltage", "Current" };
         public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V", ""};
+        public static readonly string[] Pins = {"Arduino pin 2", "Arduino pin 6", "Arduino pin 7", "Arduino pin 10", "Arduino pin 13"};
         DateTime lastGuiUpdate = DateTime.Now;
         private double guiUpdatePeriod = 0.2;
         public event GuiUpdateDelegate GuiUpdateEvent;
@@ -242,6 +243,12 @@ namespace MightyWatt
             device.ImmediateStop();
         }
 
+        // stops the load but sends any data already in the queue
+        public void FinishAndStop()
+        {
+            device.Stop();
+        }
+
         // skips execution of single program line
         public void Skip()
         {
@@ -313,6 +320,36 @@ namespace MightyWatt
             cancel = false;
         }
 
+        // sets or resets pin(s) in program mode
+        private void Pin(int programItemNumber)
+        {
+            byte pinNumber = ProgramItems[programItemNumber].Pin;
+            programItemsStartTime.Add(DateTime.Now);
+
+            if (ProgramItems[programItemNumber].SetUserPin)
+            {
+                if (pinNumber < Pins.Length)
+                {
+                    device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << pinNumber) | 0x80));
+                }
+                else
+                {
+                    device.SetValue(WriteCommands.UserPins, Convert.ToByte(((1 << Pins.Length) - 1) | 0x80));
+                }
+            }
+            else
+            {
+                if (pinNumber < Pins.Length)
+                {
+                    device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << pinNumber)));
+                }
+                else
+                {
+                    device.SetValue(WriteCommands.UserPins, Convert.ToByte(((1 << Pins.Length) - 1)));
+                }
+            }
+        }
+
         // program execution
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -336,6 +373,10 @@ namespace MightyWatt
                     {
                         Ramp(currentItemNumber);
                     }
+                    else if (ProgramItems[currentItemNumber].ProgramMode == ProgramModes.Pin)
+                    {
+                        Pin(currentItemNumber);
+                    }
                 }
 
                 if (((BackgroundWorker)sender).CancellationPending)
@@ -350,7 +391,7 @@ namespace MightyWatt
         // final cleanup after program is finished or stopped
         private void worker_Finished(object sender, RunWorkerCompletedEventArgs e)
         {
-            ImmediateStop();
+            FinishAndStop();
             isManual = true;
             ProgramStoppedEvent?.Invoke(); // raise program started event
         }
@@ -562,7 +603,7 @@ namespace MightyWatt
         {
             if (isConnected)
             {
-                device.SetValue(WriteCommands.UserPins, 0);                
+                device.SetValue(WriteCommands.UserPins, 0x7F);
             }
         }
 
@@ -912,11 +953,11 @@ namespace MightyWatt
                 {
                     if (value)
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 0)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 0) | 0x80));
                     }
                     else
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 0)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 0)));
                     }
                 }                
             }
@@ -934,11 +975,11 @@ namespace MightyWatt
                 {
                     if (value)
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 1)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 1) | 0x80));
                     }
                     else
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 1)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 1)));
                     }
                 }
             }
@@ -956,11 +997,11 @@ namespace MightyWatt
                 {
                     if (value)
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 2)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 2) | 0x80));
                     }
                     else
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 2)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(1 << 2));
                     }
                 }
             }
@@ -978,11 +1019,11 @@ namespace MightyWatt
                 {
                     if (value)
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 3)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 3) | 0x80));
                     }
                     else
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 3)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(1 << 3));
                     }
                 }
             }
@@ -1000,11 +1041,11 @@ namespace MightyWatt
                 {
                     if (value)
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins | (1 << 4)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte((1 << 4) | 0x80));
                     }
                     else
                     {
-                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(device.UserPins & ~(1 << 4)));
+                        device.SetValue(WriteCommands.UserPins, Convert.ToByte(1 << 4));
                     }
                 }
             }

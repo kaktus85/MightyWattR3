@@ -6,7 +6,6 @@
  * GNU GPL v.3
  */
 
-
 /* <Includes> */ 
 
 #include "Arduino.h"
@@ -15,6 +14,13 @@
 #include "PinController.h"
 
 /* </Includes> */ 
+
+
+/* <Defines and macros> */
+
+#define PINCONTROLLER_ISSET(x)    ((((x) >> 7) & 0x1) > 0)
+
+/* </Defines and macros> */ 
 
 
 /* <Module variables> */ 
@@ -42,7 +48,16 @@ void PinController_Do(void)
     switch (writeCommand->command)
     {
       case WriteCommand_Pins:
-        Pin_Set((writeCommand->data)[0]);
+        if (PINCONTROLLER_ISSET((writeCommand->data)[0]))
+        {
+          // set pins
+          Pin_Set(PinController_GetPins() | (writeCommand->data)[0] & 0x7F);
+        }
+        else
+        {
+          // reset pins
+          Pin_Set(PinController_GetPins() & ~((writeCommand->data)[0]) & 0x7F);
+        }
       break;
       default:
       /* command handled by other modules */

@@ -1137,7 +1137,7 @@ namespace MightyWatt
                             programItem = new ProgramItem((Modes)(comboBoxProgramConstantQuantity.SelectedIndex), initialValue, textBoxProgramConstantDuration.Text, (TimeUnits)(comboBoxProgramConstantUnit.SelectedIndex));
                         }
                     }
-                    else // adds ramp program item
+                    else if (tabControlProgram.SelectedItem == tabItemProgramRamp) // adds ramp program item
                     {
                         if (checkBoxProgramRampPrevious.IsChecked == false) // use previously measured value as the starting point if true, parse text box if false
                         {
@@ -1151,6 +1151,17 @@ namespace MightyWatt
                         else
                         {
                             programItem = new ProgramItem((Modes)(comboBoxProgramRampQuantity.SelectedIndex), initialValue, Double.Parse(textBoxProgramRampFinalValue.Text), textBoxProgramRampDuration.Text, (TimeUnits)(comboBoxProgramRampDurationUnit.SelectedIndex));
+                        }
+                    }
+                    else /*if (tabControlProgram.SelectedItem == tabItemUserPins)*/ // adds ramp program item
+                    {
+                        if (radioButtonUserPinSet.IsChecked == true)
+                        {
+                            programItem = new ProgramItem(Convert.ToByte(comboBoxProgramUserPinsPins.SelectedIndex), true);
+                        }
+                        else /*if (radioButtonUserPinReset.IsChecked == true)*/
+                        {
+                            programItem = new ProgramItem(Convert.ToByte(comboBoxProgramUserPinsPins.SelectedIndex), false);
                         }
                     }
                     load.ProgramItems.Add(programItem); // add to program item list                         

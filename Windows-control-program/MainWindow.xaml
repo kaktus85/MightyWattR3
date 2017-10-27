@@ -175,6 +175,20 @@
                             <Label Content="Unit" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="273,117,0,0" Name="labelProgramRampSkipUnit" VerticalAlignment="Top" Width="23" />
                         </Grid>
                     </TabItem>
+                    <TabItem Header="User pins" Name="tabItemUserPins">
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <ComboBox Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="comboBoxProgramUserPinsPins" SelectedIndex="0" VerticalAlignment="Top" Width="160">
+                                <ComboBoxItem Content="Arduino pin 2" />
+                                <ComboBoxItem Content="Arduino pin 6" />
+                                <ComboBoxItem Content="Arduino pin 7" />
+                                <ComboBoxItem Content="Arduino pin 10" />
+                                <ComboBoxItem Content="Arduino pin 13" />
+                                <ComboBoxItem Content="All user pins" />
+                            </ComboBox>
+                            <RadioButton x:Name="radioButtonUserPinSet" Content="Set" Margin="10,36,0,0" GroupName="UserPin" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" IsChecked="True"/>
+                            <RadioButton x:Name="radioButtonUserPinReset" Content="Reset" Margin="10,61,0,0" GroupName="UserPin" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100"/>
+                        </Grid>
+                    </TabItem>
                 </TabControl>
                 <RadioButton Content="Infinite" Height="16" HorizontalAlignment="Left" Margin="205,0,0,38" Name="radioButtonProgramLoopInfinite" VerticalAlignment="Bottom" GroupName="loop" IsEnabled="False" Checked="radioButtonProgramLoopInfinite_Checked" />
                 <RadioButton Height="16" HorizontalAlignment="Left" Margin="74,0,0,36" Name="radioButtonProgramLoopFinite" VerticalAlignment="Bottom" GroupName="loop" IsThreeState="False" IsChecked="True" IsEnabled="False" Checked="radioButtonProgramLoopFinite_Checked" />

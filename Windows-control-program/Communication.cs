@@ -24,11 +24,11 @@ namespace MightyWatt
         private const Parity parity = Parity.None;
         private const StopBits stopBits = StopBits.One;
         private const int readTimeout = 500;
-        private const int writeTimeout = 400;        
+        private const int writeTimeout = 400;
         public const int LoadDelay = readTimeout + writeTimeout;
         private const int baudRate = 500000;
         private const int dataBits = 8;
-        private readonly char[] newLine = new char[] {'\r', '\n'};
+        private readonly char[] newLine = new char[] { '\r', '\n' };
         //private readonly string newLine = "\r\n";
         private string activePortName;
         public event ConnectionUpdateDelegate ConnectionUpdatedEvent;
@@ -112,7 +112,7 @@ namespace MightyWatt
                     //port.RtsControl = false;
                 }
 
-                port.Open();                
+                port.Open();
                 while (port.IsOpen == false) { } // wait for port to open   
                 Thread.Sleep(300); // give time to Arduinos that reset upon port opening     
                 port.Flush();
@@ -127,7 +127,7 @@ namespace MightyWatt
                     comLoop.RunWorkerAsync();
                 }
                 else
-                {                    
+                {
                     port.Close();
                     while (port.IsOpen) { } // wait for port to close
                     Connect(portNumber, rtsDtrEnable, attempts - 1); // recursively call this function with one less attempt to try
@@ -158,12 +158,12 @@ namespace MightyWatt
 
             // resets all read data
             current = 0;
-            voltage = 0;            
+            voltage = 0;
             temperature = 0;
             status = 0;
             UserPins = 0;
             errorFlags = 0;
-            seriesResistance = 0;           
+            seriesResistance = 0;
 
             // resets all port and device information
             activePortName = null;
@@ -209,7 +209,7 @@ namespace MightyWatt
                     {
                         DataUpdatedEvent?.Invoke(); // event for data update complete
                         //cyclecounter++;
-                    }                    
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -226,7 +226,7 @@ namespace MightyWatt
                     }
                     throw;
                 }
-               // Thread.Sleep(loopDelay);
+                // Thread.Sleep(loopDelay);
             }
             e.Cancel = true;
         }
@@ -260,12 +260,12 @@ namespace MightyWatt
                     //}
                     port.Write(dataWithCRC);
                 }
-            }     
+            }
         }
 
         // reads available measurement from the load, returns true if successful
         private bool readMeasurement()
-        {            
+        {
             byte[] newData = port.ReadBytes(measurementMessageLength);
             if (newData != null)
             {
@@ -299,7 +299,7 @@ namespace MightyWatt
 
                         return true;
                     }
-                }                
+                }
             }
 
             return false;
@@ -307,7 +307,7 @@ namespace MightyWatt
 
         // tries to read identification string from the load, return true if successful
         private bool identify()
-        {         
+        {
             try
             {
                 Query((byte)ReadCommands.IDN);
@@ -316,7 +316,7 @@ namespace MightyWatt
                 {
                     DeviceIdentification = response;
                     return true;
-                }                
+                }
                 else
                 {
                     DeviceIdentification = string.Empty;
@@ -375,16 +375,16 @@ namespace MightyWatt
                 if (!firmwareVersionOK)
                 {
                     System.Windows.MessageBox.Show("Firmware version is lower than minimum required version for this software\nMinimum firmware version: " + Load.MinimumFirmwareVersion + "\nThis load firmware version: " + firmwareVersion, "Firmware version error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Exclamation);
-                }                
-            }  
+                }
+            }
             else
             {
                 System.Windows.MessageBox.Show("The load did not report its firmware version", "Unknown firmware version", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Exclamation);
-            }             
+            }
         }
 
         // Gets the list of error messages from load (not the present errors, only the string representations of possible errors)
-        private void queryErrorMessages() 
+        private void queryErrorMessages()
         {
             Query((byte)ReadCommands.ErrorMessages);
             int length = port.ReadByte();
@@ -458,7 +458,7 @@ namespace MightyWatt
                         val = Convert.ToUInt32(value * 1000);
                         dataItem[0] |= (byte)WriteCommands.ConstantResistanceCV;
                         break;
-                    case Modes.SimpleAmmeter:                        
+                    case Modes.SimpleAmmeter:
                         dataItem[0] |= (byte)WriteCommands.SimpleAmmeter;
                         break;
                     default:
@@ -478,6 +478,12 @@ namespace MightyWatt
         public void ImmediateStop()
         {
             dataToWrite.Clear();
+            Stop();
+        }
+
+        // stops the load but sends any data already in the queue
+        public void Stop()
+        {            
             Set(Modes.Current, 0);
             try
             {
