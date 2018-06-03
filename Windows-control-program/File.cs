@@ -61,9 +61,13 @@ namespace MightyWatt
                 sb.Append(elapsedSeconds());
                 sb.Append(delimiter);
                 sb.Append(" ");
-                sb.Append(now.ToLongTimeString());
+                sb.Append(now.Hour.ToString("00"));
                 sb.Append(":");
-                sb.Append(now.Millisecond);
+                sb.Append(now.Minute.ToString("00"));
+                sb.Append(":");
+                sb.Append(now.Second.ToString("00"));
+                sb.Append(":");
+                sb.Append(now.Millisecond.ToString("000"));
                 file.WriteLine(sb.ToString());
             } 
         }

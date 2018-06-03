@@ -117,8 +117,13 @@ namespace MightyWatt
                 if (port.IsOpen)
                 {
                     port.Write(buffer, 0, buffer.Length);
+                    DateTime now = DateTime.Now;
+                    //if (buffer.Length > 3)
+                    //{
+                    //    Console.WriteLine("Written {0} bytes at {1}.{2}:{3}:{4}", buffer.Length, now.Hour.ToString("00"), now.Minute.ToString("00"), now.Second.ToString("00"), now.Millisecond.ToString("000"));
+                    //}
                 }
-            }
+            }            
         }
 
         public int BytesToWrite

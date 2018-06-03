@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Management;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace MightyWatt
 {
@@ -46,7 +47,6 @@ namespace MightyWatt
         private const int loopDelay = 1; // delay between read/write attempts
         private BackgroundWorker comLoop;
         public event DataUpdateDelegate DataUpdatedEvent;
-        private byte[] dataItem;
         private string[] errorMessages;
         private Queue<byte[]> dataToWrite;
 
@@ -65,6 +65,7 @@ namespace MightyWatt
         private double seriesResistance;
         private bool remote;
         private byte userPins;
+        private bool stopped = true;
 
         // DEBUG
         //private int crcFails = 0;
@@ -81,6 +82,7 @@ namespace MightyWatt
             port.StopBits = stopBits;
             port.WriteTimeout = writeTimeout;
             port.NewLine = newLine;
+            //port.NewLine = new string(newLine);
 
             dataToWrite = new Queue<byte[]>();
 
@@ -88,6 +90,8 @@ namespace MightyWatt
             comLoop.WorkerReportsProgress = false;
             comLoop.WorkerSupportsCancellation = true;
             comLoop.DoWork += new DoWorkEventHandler(comLoop_DoWork);
+
+            //ConsoleAllocator.ShowConsoleWindow();
         }
 
         // connects to a specific COM port
@@ -114,7 +118,7 @@ namespace MightyWatt
 
                 port.Open();
                 while (port.IsOpen == false) { } // wait for port to open   
-                Thread.Sleep(300); // give time to Arduinos that reset upon port opening     
+                Thread.Sleep(1000); // give time to Arduinos that reset upon port opening     
                 port.Flush();
 
                 if (identify())
@@ -196,20 +200,31 @@ namespace MightyWatt
             {
                 try
                 {
-                    //if ((DateTime.Now - start).TotalMilliseconds > 10000)
+                    //if ((DateTime.Now - start).TotalMilliseconds > 1000)
                     //{
-                    //    Console.WriteLine("Cycles per second: {0:f1}", Convert.ToDouble(cyclecounter) / 10.0);
+                    //    Console.WriteLine("Cycles per second: {0:f1}", Convert.ToDouble(cyclecounter) / 1.0);
                     //    cyclecounter = 0;
                     //    start = DateTime.Now;
                     //}
 
-                    dataToWrite.Enqueue(new byte[] { COMMUNICATION_READ | ((byte)ReadCommands.Measurement & 0x7F) });
+                    if (stopped)
+                    {
+                        Set(Modes.Current, 0);
+                    }
+                    dataToWrite.Enqueue(new byte[] { COMMUNICATION_READ | ((byte)ReadCommands.Measurement & 0x7F) });                    
+
+                    //Console.WriteLine("Queue length: {0}", dataToWrite.Count);
                     setToLoad();
                     if (readMeasurement())
                     {
                         DataUpdatedEvent?.Invoke(); // event for data update complete
                         //cyclecounter++;
+                        //Console.WriteLine("Data received");
                     }
+                    //else
+                    //{
+                    //    Console.WriteLine("No data");
+                    //}
                 }
                 catch (Exception ex)
                 {
@@ -257,6 +272,8 @@ namespace MightyWatt
                     //    {
                     //        Console.Write("0x{0:X}\t", b);
                     //    }
+                    //    Console.WriteLine();
+                    //    Console.WriteLine();
                     //}
                     port.Write(dataWithCRC);
                 }
@@ -401,8 +418,14 @@ namespace MightyWatt
         // this method handles the communication protocol of sending the data to the load
         public void Set(Modes mode, double value)
         {
+            if (mode != Modes.Current || value != 0)
+            {
+                stopped = false;
+            }
+
             if (port.IsOpen)
             {
+                byte[] dataItem;
                 validateValues(mode, value); // validate input
                 if (mode == Modes.SimpleAmmeter)
                 {
@@ -483,16 +506,16 @@ namespace MightyWatt
 
         // stops the load but sends any data already in the queue
         public void Stop()
-        {            
-            Set(Modes.Current, 0);
-            try
-            {
-                setToLoad();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+        {
+            //try
+            //{
+            //    setToLoad();
+            stopped = true;
+            //}
+            //catch (Exception ex)
+            //{
+            //    System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            //}            
         }
 
         // checks values for validity
@@ -890,5 +913,50 @@ namespace MightyWatt
                 return sb.ToString();
             }
         }
-    }    
+
+        public int QueueCount
+        {
+            get
+            {
+                return dataToWrite.Count;
+            }
+        }
+    }
+
+    internal static class ConsoleAllocator
+    {
+        [DllImport(@"kernel32.dll", SetLastError = true)]
+        static extern bool AllocConsole();
+
+        [DllImport(@"kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport(@"user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        const int SwHide = 0;
+        const int SwShow = 5;
+
+
+        public static void ShowConsoleWindow()
+        {
+            var handle = GetConsoleWindow();
+
+            if (handle == IntPtr.Zero)
+            {
+                AllocConsole();
+            }
+            else
+            {
+                ShowWindow(handle, SwShow);
+            }
+        }
+
+        public static void HideConsoleWindow()
+        {
+            var handle = GetConsoleWindow();
+
+            ShowWindow(handle, SwHide);
+        }
+    }
 }

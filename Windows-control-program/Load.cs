@@ -73,6 +73,7 @@ namespace MightyWatt
         public TimeUnits LoggingTimeUnit { get; set; } // time units for logging
         private DateTime lastManualLog = DateTime.MinValue;
         private DateTime lastProgramLog = DateTime.MinValue;
+        private double lastLogSecondDifference = 0;
 
         // minimum firmware version
         public static readonly int[] MinimumFWVersion = new int[] { 3, 1, 4 };
@@ -107,7 +108,7 @@ namespace MightyWatt
             device.DataUpdatedEvent += checkError; // errors
             device.DataUpdatedEvent += watchdog; // watchdog
             device.DataUpdatedEvent += seriesResistanceWatchdog; // series resistance watchdog
-            device.DataUpdatedEvent += log; // data logging            
+            device.DataUpdatedEvent += log; // data logging          
 
             device.ConnectionUpdatedEvent += SetDefault;// LED brightness, LED rules, Fan rules, measurement filter;
 
@@ -246,7 +247,7 @@ namespace MightyWatt
         // stops the load but sends any data already in the queue
         public void FinishAndStop()
         {
-            device.Stop();
+            device.Stop();            
         }
 
         // skips execution of single program line
@@ -264,13 +265,15 @@ namespace MightyWatt
         // runs constant mode program item
         private void Constant(int programItemNumber)
         {
+            double setValue;
+
             if (ProgramItems[programItemNumber].Value != null)
             {
-                device.Set(ProgramItems[programItemNumber].Mode, (double)(ProgramItems[programItemNumber].Value));
+                setValue = (double)(ProgramItems[programItemNumber].Value);
             }
             else
             {
-                device.Set(ProgramItems[programItemNumber].Mode, device.GetValue(ProgramItems[programItemNumber].Mode));
+                setValue = device.GetValue(ProgramItems[programItemNumber].Mode);
             }
             programItemsStartTime.Add(DateTime.Now);
             // loop
@@ -283,7 +286,13 @@ namespace MightyWatt
                         break;
                     }
                 }
-                System.Threading.Thread.Sleep(1); // decrease CPU load
+
+                while (device.QueueCount > 2)
+                {
+                    System.Threading.Thread.Sleep(10); // decrease CPU load
+                }
+
+                device.Set(ProgramItems[programItemNumber].Mode, setValue);
             }
             cancel = false;
         }
@@ -300,13 +309,11 @@ namespace MightyWatt
             {
                 startValue = device.GetValue(ProgramItems[programItemNumber].Mode);
             }
-            currentValue = startValue;
             programItemsStartTime.Add(DateTime.Now);
-
+            bool start = true;
             // loop
-            while (((DateTime.Now - programItemsStartTime[programItemNumber]).TotalSeconds < ProgramItems[programItemNumber].Duration) && (cancel == false))
+            while ((cancel == false) && ((DateTime.Now - programItemsStartTime[programItemNumber]).TotalSeconds < ProgramItems[programItemNumber].Duration))
             {
-                device.Set(ProgramItems[programItemNumber].Mode, currentValue);
                 if (ProgramItems[programItemNumber].SkipEnabled) // check skip condition
                 {
                     if (valueComparer(ProgramItems[programItemNumber].SkipValue, ProgramItems[programItemNumber].SkipMode, ProgramItems[programItemNumber].SkipComparator))
@@ -314,10 +321,33 @@ namespace MightyWatt
                         break;
                     }
                 }
-                currentValue = startValue + (ProgramItems[programItemNumber].FinalValue - startValue) / ProgramItems[programItemNumber].Duration * ((DateTime.Now - programItemsStartTime[programItemNumber]).TotalSeconds);
-                System.Threading.Thread.Sleep(1); // decrease CPU load 
+
+                while (device.QueueCount > 2)
+                {
+                    System.Threading.Thread.Sleep(1); // decrease CPU load
+                }
+
+                if (start)
+                {
+                    device.Set(ProgramItems[programItemNumber].Mode, startValue);
+                    start = false;
+                }
+                else
+                {
+                    currentValue = startValue + (ProgramItems[programItemNumber].FinalValue - startValue) / ProgramItems[programItemNumber].Duration * ((DateTime.Now - programItemsStartTime[programItemNumber]).TotalSeconds);
+                    if (ProgramItems[programItemNumber].StartingValue <= ProgramItems[programItemNumber].FinalValue)
+                    {
+                        currentValue = Math.Min(currentValue, ProgramItems[programItemNumber].FinalValue);
+                    }
+                    else
+                    {
+                        currentValue = Math.Max(currentValue, ProgramItems[programItemNumber].FinalValue);
+                    }
+
+                    device.Set(ProgramItems[programItemNumber].Mode, currentValue);
+                }
             }
-            cancel = false;
+            cancel = false;            
         }
 
         // sets or resets pin(s) in program mode
@@ -390,7 +420,7 @@ namespace MightyWatt
 
         // final cleanup after program is finished or stopped
         private void worker_Finished(object sender, RunWorkerCompletedEventArgs e)
-        {
+        {            
             FinishAndStop();
             isManual = true;
             ProgramStoppedEvent?.Invoke(); // raise program started event
@@ -542,30 +572,46 @@ namespace MightyWatt
         // manages data logging        
         private void log()
         {
-            if (file != null)
+            if (file?.FilePath != null)
             {
-                if (file.FilePath != null)
+                DateTime now = DateTime.Now;
+                if (lastLogSecondDifference > 1)
                 {
-                    DateTime now = DateTime.Now;
-                    // manual control logging
-                    if (IsLoggingManual && isManual)
-                    {                        
-                        if ((now - lastManualLog).TotalSeconds >= LoggingPeriod)
-                        {
-                            file.WriteData(Current, Voltage, Temperature, Remote);
-                            lastManualLog = now;
-                        }
-                    }
-                    // program control logging
-                    else if (IsLoggingProgram && !isManual)
+                    // Reset last log difference if the value seems not to be valid
+                    lastLogSecondDifference = 0;
+                }
+
+                // manual control logging
+                if (IsLoggingManual && isManual)
+                {                        
+                    if ((now - lastManualLog).TotalSeconds >= (LoggingPeriod - lastLogSecondDifference))
                     {
-                        if ((now - lastProgramLog).TotalSeconds >= LoggingPeriod)
-                        {
-                            file.WriteData(Current, Voltage, Temperature, Remote);
-                            lastProgramLog = now;
-                        }
+                        lastLogSecondDifference += (now - lastManualLog).TotalSeconds - LoggingPeriod;
+                        file.WriteData(Current, Voltage, Temperature, Remote);
+                        lastManualLog = now;
                     }
                 }
+                // program control logging
+                else if (IsLoggingProgram && !isManual)
+                {
+                    if ((now - lastProgramLog).TotalSeconds >= (LoggingPeriod - lastLogSecondDifference))
+                    {
+                        lastLogSecondDifference += (now - lastProgramLog).TotalSeconds - LoggingPeriod;
+                        //Console.WriteLine("Logging period: {0}, difference: {1}", LoggingPeriod, lastLogSecondDifference);
+                        file.WriteData(Current, Voltage, Temperature, Remote);
+                        lastProgramLog = now;
+                    }
+                }
+                else
+                {
+                    // Reset last log difference
+                    lastLogSecondDifference = 0;
+                }
+            }
+            else
+            {
+                // Reset last log difference
+                lastLogSecondDifference = 0;
             }
         }     
         

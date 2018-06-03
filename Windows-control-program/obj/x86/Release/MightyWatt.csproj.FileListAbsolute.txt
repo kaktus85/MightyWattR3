@@ -597,3 +597,4 @@ C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Release\Tools\Stat
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Release\MightyWatt.g.resources
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Release\MightyWatt.Properties.Resources.resources
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Release\MightyWatt.csproj.GenerateResource.Cache
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Release\MightyWatt.csproj.CoreCompileInputs.cache
