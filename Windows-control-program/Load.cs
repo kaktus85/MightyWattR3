@@ -247,7 +247,7 @@ namespace MightyWatt
         // stops the load but sends any data already in the queue
         public void FinishAndStop()
         {
-            device.Stop();            
+            device.Stop();
         }
 
         // skips execution of single program line
@@ -423,6 +423,7 @@ namespace MightyWatt
         {            
             FinishAndStop();
             isManual = true;
+            file?.Flush();
             ProgramStoppedEvent?.Invoke(); // raise program started event
         }
         
