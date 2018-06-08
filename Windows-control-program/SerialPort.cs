@@ -314,7 +314,7 @@ namespace MightyWatt
 
         public Task<string> ReadLineAsync()
         {
-            char[] buffer = new char[4096];
+            char[] buffer = new char[16384];
             int length = 0;
             int readBytes;
             byte[] b = new byte[1];
@@ -373,7 +373,7 @@ namespace MightyWatt
 
         public string ReadLine()
         {
-            char[] buffer = new char[4096];
+            char[] buffer = new char[16384];
             int length = 0;
             int readBytes;
             byte[] b = new byte[1];
@@ -426,7 +426,7 @@ namespace MightyWatt
 
         public byte[] ReadExisting()
         {
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[16384];
             int readBytes = 0, length = 0;
             do
             {

@@ -588,3 +588,5 @@ C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\MightyWatt.g
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\MightyWatt.Properties.Resources.resources
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\MightyWatt.csproj.GenerateResource.Cache
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\MightyWatt.csproj.CoreCompileInputs.cache
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\DebugWindow.g.cs
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\x86\Debug\DebugWindow.baml

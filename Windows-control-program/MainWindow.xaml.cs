@@ -86,6 +86,9 @@ namespace MightyWatt
         // disconnects load when the program exits
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+#if DEBUG
+            App.CloseDebugWindow();
+#endif
             statisticsWindow?.Close();
             load.Disconnect();
             base.OnClosing(e);

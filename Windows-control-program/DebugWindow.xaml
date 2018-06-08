@@ -1,0 +1,12 @@
+﻿<Window x:Class="MightyWatt.DebugWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MightyWatt"
+        mc:Ignorable="d"
+        Title="MightyWatt R3 Debug Window" Height="450" Width="800" WindowStyle="ToolWindow">
+    <Grid>
+        <TextBox Margin="10" TextWrapping="Wrap" Text="{Binding Text, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" MouseUp="TextBox_MouseUp" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" TextChanged="TextBox_TextChanged"/>
+    </Grid>
+</Window>

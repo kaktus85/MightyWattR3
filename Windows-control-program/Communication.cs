@@ -7,6 +7,7 @@ using System.Management;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace MightyWatt
 {
@@ -22,6 +23,7 @@ namespace MightyWatt
 
         // COM port
         private SerialPort port;
+        //private SerialPortNative port;
         private const Parity parity = Parity.None;
         private const StopBits stopBits = StopBits.One;
         private const int readTimeout = 500;
@@ -68,13 +70,16 @@ namespace MightyWatt
         private bool stopped = true;
 
         // DEBUG
-        //private int crcFails = 0;
+#if DEBUG
+        private int crcFails = 0;
+#endif
 
         public Communication()
         {
             values = new MeasurementValues(voltage, current);
             // creates new serialport object and sets it
             port = new SerialPort();
+            //port = new SerialPortNative();
             port.BaudRate = baudRate;
             port.DataBits = dataBits;
             port.Parity = parity;
@@ -90,8 +95,6 @@ namespace MightyWatt
             comLoop.WorkerReportsProgress = false;
             comLoop.WorkerSupportsCancellation = true;
             comLoop.DoWork += new DoWorkEventHandler(comLoop_DoWork);
-
-            //ConsoleAllocator.ShowConsoleWindow();
         }
 
         // connects to a specific COM port
@@ -194,52 +197,62 @@ namespace MightyWatt
         // reads data from load and then raises update event 
         private void comLoop_DoWork(object sender, DoWorkEventArgs e)
         {
-            //uint cyclecounter = 0;
-            //DateTime start = DateTime.Now;
+#if DEBUG
+            int reads = 0;
+            int writes = 0;
+            DateTime start = DateTime.Now;
+#endif
             while (!comLoop.CancellationPending)
             {
                 try
                 {
-                    //if ((DateTime.Now - start).TotalMilliseconds > 1000)
-                    //{
-                    //    Console.WriteLine("Cycles per second: {0:f1}", Convert.ToDouble(cyclecounter) / 1.0);
-                    //    cyclecounter = 0;
-                    //    start = DateTime.Now;
-                    //}
+#if DEBUG
+                    if ((DateTime.Now - start).TotalMilliseconds > 1000)
+                    {
+                        App.DebugOutput.WriteLine(string.Format("Reads per second: {0:f1}. Writes per second: {0:f1}.", Convert.ToDouble(reads) / 1.0, Convert.ToDouble(writes) / 1.0));
+                        reads = 0;
+                        writes = 0;
+                        start = DateTime.Now;
+                    }
+#endif
 
                     if (stopped)
                     {
                         Set(Modes.Current, 0);
                     }
-                    dataToWrite.Enqueue(new byte[] { COMMUNICATION_READ | ((byte)ReadCommands.Measurement & 0x7F) });                    
-
-                    //Console.WriteLine("Queue length: {0}", dataToWrite.Count);
+                    dataToWrite.Enqueue(new byte[] { COMMUNICATION_READ | ((byte)ReadCommands.Measurement & 0x7F) });
+#if DEBUG
+                    writes += dataToWrite.Count;
+#endif
                     setToLoad();
                     if (readMeasurement())
                     {
                         DataUpdatedEvent?.Invoke(); // event for data update complete
-                        //cyclecounter++;
-                        //Console.WriteLine("Data received");
+#if DEBUG
+                        reads++;
+#endif
                     }
-                    //else
-                    //{
-                    //    Console.WriteLine("No data");
-                    //}
                 }
                 catch (Exception ex)
                 {
+#if DEBUG
+                    App.DebugOutput.WriteLine(string.Format("Communication error: {0}", ex.Message));
+#endif
+
                     if (ex is TimeoutException || ex is System.IO.IOException)
                     {
                         Disconnect();
                         System.Windows.MessageBox.Show(ex.Message + "\nTo continue, please reconnect load.", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                        return;
                     }
-                    if (ex is InvalidOperationException)
+                    else if (ex is InvalidOperationException)
                     {
                         System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                        return;
                     }
-                    throw;
+                    else
+                    {
+                        System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                    }                    
+                    return;
                 }
                 // Thread.Sleep(loopDelay);
             }
@@ -293,8 +306,10 @@ namespace MightyWatt
                     if (crc != Convert.ToUInt16((newData[15] | (newData[16] << 8)) & 0xFFFF))
                     {
                         // CRC check failed, drop data
-                        //port.Flush(); // clear stream
-                        //Console.WriteLine("CRC check failed. Fails so far: {0}.", ++crcFails);
+                        port.Flush(); // clear stream
+#if DEBUG
+                        App.DebugOutput.WriteLine(string.Format("CRC check failed. Fails so far: {0}.", ++crcFails));
+#endif
                         return false;
                     }
                     else
@@ -317,6 +332,12 @@ namespace MightyWatt
                         return true;
                     }
                 }
+#if DEBUG
+                else
+                {
+                    App.DebugOutput.WriteLine(string.Format("Incomplete data received. Expected length: {0}, received length: {1}", measurementMessageLength, newData.Length));
+                }
+#endif
             }
 
             return false;

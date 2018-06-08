@@ -16,6 +16,7 @@ namespace MightyWatt
         public const char delimiter = '\t';
         public DateTime lastFlush = DateTime.MinValue;
         const double flushPeriod = 1; // period of flushes to file (s)
+        private StringBuilder sb = new StringBuilder();
 
         // creates a new file with header and notes the starting time
         public File(string filePath)
@@ -40,38 +41,29 @@ namespace MightyWatt
 
         // writes a single line of load data to the file
         public void WriteData(double current, double voltage, double temperature, bool remote)
-        {
+        {            
             if (!string.IsNullOrEmpty(FilePath))
             {
-                StringBuilder sb = new StringBuilder();
-                string lr;
                 DateTime now = DateTime.Now;
-                if (remote)
-                {
-                    lr = "r";
-                }
-                else
-                {
-                    lr = "l";
-                }
-                sb.Append(current.ToString(NUMBER_FORMAT));
+                sb.Clear();                      
+                sb.AppendFormat(current.ToString(), NUMBER_FORMAT);
                 sb.Append(delimiter);
-                sb.Append(voltage.ToString(NUMBER_FORMAT));
+                sb.AppendFormat(voltage.ToString(), NUMBER_FORMAT);
                 sb.Append(delimiter);
-                sb.Append(temperature.ToString(TEMPERATURE_NUMBER_FORMAT));
+                sb.AppendFormat(temperature.ToString(), TEMPERATURE_NUMBER_FORMAT);
                 sb.Append(delimiter);
-                sb.Append(lr);
+                sb.Append(remote ? "r" : "l");
                 sb.Append(delimiter);
                 sb.Append(elapsedSeconds());
                 sb.Append(delimiter);
                 sb.Append(" ");
-                sb.Append(now.Hour.ToString("00"));
+                sb.AppendFormat(now.Hour.ToString(), "00");
                 sb.Append(":");
-                sb.Append(now.Minute.ToString("00"));
+                sb.AppendFormat(now.Minute.ToString(), "00");
                 sb.Append(":");
-                sb.Append(now.Second.ToString("00"));
+                sb.AppendFormat(now.Second.ToString(), "00");
                 sb.Append(":");
-                sb.Append(now.Millisecond.ToString("000"));
+                sb.AppendFormat(now.Millisecond.ToString(), "000");
                 file.WriteLine(sb.ToString());
             } 
         }

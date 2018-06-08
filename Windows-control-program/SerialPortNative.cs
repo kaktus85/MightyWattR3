@@ -9,8 +9,6 @@ namespace MightyWatt
     class SerialPortNative
     {
         private System.IO.Ports.SerialPort port;
-
-        private bool isOpen = false;
         private string newLine = "\r\n";
         private byte portNumber;
         private uint baudRate = 0;
@@ -21,6 +19,8 @@ namespace MightyWatt
         private StopBits stopBits = StopBits.One;
         private uint readTimeout = 500;
         private uint writeTimeout = 500;
+        private int writeBufferSize = 16384;
+        private int readBufferSize = 16384;
 
         public SerialPortNative()
         {
@@ -50,10 +50,12 @@ namespace MightyWatt
             port.RtsEnable = rtsControl;
             port.StopBits = stopBits;
             port.WriteTimeout = (int)writeTimeout;
+            port.WriteBufferSize = writeBufferSize;
+            port.ReadBufferSize = readBufferSize;
 
             port.Open();
             while (port.IsOpen == false) { }
-            isOpen = true;
+            IsOpen = true;
         }
 
         public void Close()
@@ -67,7 +69,7 @@ namespace MightyWatt
                 port.Dispose();
                 port = null;
             }
-            isOpen = false;            
+            IsOpen = false;            
         }
 
         public byte[] ReadBytes(int count)
@@ -115,9 +117,9 @@ namespace MightyWatt
             if (port != null)
             {
                 if (port.IsOpen)
-                {
-                    port.Write(buffer, 0, buffer.Length);
-                    DateTime now = DateTime.Now;
+                {                    
+                    port.BaseStream.Write(buffer, 0, buffer.Length);
+                    //DateTime now = DateTime.Now;
                     //if (buffer.Length > 3)
                     //{
                     //    Console.WriteLine("Written {0} bytes at {1}.{2}:{3}:{4}", buffer.Length, now.Hour.ToString("00"), now.Minute.ToString("00"), now.Second.ToString("00"), now.Millisecond.ToString("000"));
@@ -319,9 +321,6 @@ namespace MightyWatt
             }
         }
 
-        public bool IsOpen
-        {
-            get { return isOpen; }
-        }
+        public bool IsOpen { get; private set; } = false;
     }
 }

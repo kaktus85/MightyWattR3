@@ -104,11 +104,11 @@ namespace MightyWatt
             device.PropertyChanged += Device_PropertyChanged;   
 
             device.ConnectionUpdatedEvent += connectionUpdated; // pass connection updated event
+            device.DataUpdatedEvent += log; // data logging    
             device.DataUpdatedEvent += updateGui; // updates 
             device.DataUpdatedEvent += checkError; // errors
             device.DataUpdatedEvent += watchdog; // watchdog
-            device.DataUpdatedEvent += seriesResistanceWatchdog; // series resistance watchdog
-            device.DataUpdatedEvent += log; // data logging          
+            device.DataUpdatedEvent += seriesResistanceWatchdog; // series resistance watchdog                 
 
             device.ConnectionUpdatedEvent += SetDefault;// LED brightness, LED rules, Fan rules, measurement filter;
 
