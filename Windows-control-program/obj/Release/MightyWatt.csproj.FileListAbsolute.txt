@@ -1,7 +1,6 @@
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\bin\Release\MightyWatt.exe.config
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\bin\Release\MightyWatt.exe
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\bin\Release\MightyWatt.pdb
-C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.csprojResolveAssemblyReference.cache
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\About.baml
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\DeviceInfo.baml
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\LogSettings.baml

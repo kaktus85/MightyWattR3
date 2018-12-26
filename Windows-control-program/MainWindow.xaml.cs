@@ -180,6 +180,7 @@ namespace MightyWatt
             manualUnitBinding.Mode = BindingMode.OneWay;
             manualUnitBinding.Converter = new Converters.UnitEnumConverter();
             manualUnitBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            manualUnitBinding.ConverterParameter = typeof(RunMode);
             this.labelManualUnit.SetBinding(Label.ContentProperty, this.manualUnitBinding);
 
             // manual set/stop, program start buttons binding
@@ -243,6 +244,7 @@ namespace MightyWatt
             programConstantUnitBinding.Mode = BindingMode.OneWay;
             programConstantUnitBinding.Converter = new Converters.UnitEnumConverter();
             programConstantUnitBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            programConstantUnitBinding.ConverterParameter = typeof(RunMode);
             this.labelProgramConstantUnit.SetBinding(Label.ContentProperty, this.programConstantUnitBinding);
 
             // program constant skip unit label binding
@@ -252,6 +254,7 @@ namespace MightyWatt
             programConstantSkipUnitBinding.Mode = BindingMode.OneWay;
             programConstantSkipUnitBinding.Converter = new Converters.UnitEnumConverter();
             programConstantSkipUnitBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            programConstantSkipUnitBinding.ConverterParameter = typeof(WDandSkipMode);
             this.labelProgramConstantSkipUnit.SetBinding(Label.ContentProperty, this.programConstantSkipUnitBinding);
 
             // program ramp unit label binding
@@ -261,6 +264,7 @@ namespace MightyWatt
             programRampUnitBinding.Mode = BindingMode.OneWay;
             programRampUnitBinding.Converter = new Converters.UnitEnumConverter();
             programRampUnitBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            programRampUnitBinding.ConverterParameter = typeof(RampMode);
             this.labelProgramRampInitialValueUnit.SetBinding(Label.ContentProperty, this.programRampUnitBinding);
             this.labelProgramRampFinalValueUnit.SetBinding(Label.ContentProperty, this.programRampUnitBinding);
 
@@ -271,6 +275,7 @@ namespace MightyWatt
             programRampUnitSkipBinding.Mode = BindingMode.OneWay;
             programRampUnitSkipBinding.Converter = new Converters.UnitEnumConverter();
             programRampUnitSkipBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            programRampUnitSkipBinding.ConverterParameter = typeof(WDandSkipMode);
             this.labelProgramRampSkipUnit.SetBinding(Label.ContentProperty, this.programRampUnitSkipBinding);
 
             // manual groupbox enabled binding
@@ -295,6 +300,7 @@ namespace MightyWatt
             watchdogUnitBinding.Mode = BindingMode.OneWay;
             watchdogUnitBinding.Converter = new Converters.UnitEnumConverter();
             watchdogUnitBinding.ConverterCulture = System.Globalization.CultureInfo.CurrentCulture;
+            watchdogUnitBinding.ConverterParameter = typeof(WDandSkipMode);
             this.labelWatchdogUnit.SetBinding(Label.ContentProperty, this.watchdogUnitBinding);
 
             // watchdog mode binding
@@ -357,20 +363,23 @@ namespace MightyWatt
             comboBoxWatchdogQuantity.Items.Clear();
             comboBoxProgramConstantSkipQuantity.Items.Clear();
             comboBoxProgramRampSkipQuantity.Items.Clear();
-            for (int i = 0; i < Enum.GetValues(typeof(Modes)).Length; i++) // add the modes
+
+            for (int i = 0; i < Enum.GetValues(typeof(RunMode)).Length; i++) // add the modes
             {
-                comboBoxManualQuantity.Items.Add(Load.ModeNames[i]);
-                comboBoxProgramConstantQuantity.Items.Add(Load.ModeNames[i]);
-                if ((i != (int)Modes.MPPT) && (i != (int)Modes.SimpleAmmeter)) // do not add MPPT or simple ammeter to ramp
-                {
-                    comboBoxProgramRampQuantity.Items.Add(Load.ModeNames[i]);
-                }
-                if (i != (int)Modes.Power_CV && i != (int)Modes.Resistance_CV && i != (int)Modes.VoltageSoftware && i != (int)Modes.MPPT && i != (int)Modes.SimpleAmmeter) // do not add the CV software modes, MPPT and simple ammeter to watchdog and skip, use regular voltage or power
-                {
-                    comboBoxWatchdogQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
-                    comboBoxProgramConstantSkipQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
-                    comboBoxProgramRampSkipQuantity.Items.Add(Load.ModeNamesWatchdogAndSkip[i]);
-                }
+                comboBoxManualQuantity.Items.Add(((RunMode)i).Name());
+                comboBoxProgramConstantQuantity.Items.Add(((RunMode)i).Name());
+            }
+
+            for (int i = 0; i < Enum.GetValues(typeof(RampMode)).Length; i++) // add the modes
+            {
+                comboBoxProgramRampQuantity.Items.Add(((RampMode)i).Name());
+            }
+
+            for (int i = 0; i < Enum.GetValues(typeof(WDandSkipMode)).Length; i++) // add the modes
+            {
+                comboBoxWatchdogQuantity.Items.Add(((WDandSkipMode)i).Name());
+                comboBoxProgramConstantSkipQuantity.Items.Add(((WDandSkipMode)i).Name());
+                comboBoxProgramRampSkipQuantity.Items.Add(((WDandSkipMode)i).Name());
             }
 
             comboBoxManualQuantity.SelectedIndex = 0;
@@ -1091,7 +1100,7 @@ namespace MightyWatt
             {
                 try
                 {
-                    this.load.Set((Modes)(comboBoxManualQuantity.SelectedIndex), Double.Parse(textBoxManualValue.Text));
+                    this.load.Set((RunMode)(comboBoxManualQuantity.SelectedIndex), Double.Parse(textBoxManualValue.Text));
                 }
                 catch (Exception ex)
                 {
@@ -1135,11 +1144,11 @@ namespace MightyWatt
 
                         if (checkBoxProgramConstantSkip.IsChecked == true) // skip conditions apply
                         {
-                            programItem = new ProgramItem((Modes)(comboBoxProgramConstantQuantity.SelectedIndex), initialValue, textBoxProgramConstantDuration.Text, (TimeUnits)(comboBoxProgramConstantUnit.SelectedIndex), (Modes)(comboBoxProgramConstantSkipQuantity.SelectedIndex), (Comparison)(comboBoxProgramConstantSkipComparator.SelectedIndex), Double.Parse(textBoxProgramConstantSkipValue.Text));
+                            programItem = new ProgramItem((RunMode)(comboBoxProgramConstantQuantity.SelectedIndex), initialValue, textBoxProgramConstantDuration.Text, (TimeUnits)(comboBoxProgramConstantUnit.SelectedIndex), (WDandSkipMode)(comboBoxProgramConstantSkipQuantity.SelectedIndex), (Comparison)(comboBoxProgramConstantSkipComparator.SelectedIndex), Double.Parse(textBoxProgramConstantSkipValue.Text));
                         }
                         else
                         {
-                            programItem = new ProgramItem((Modes)(comboBoxProgramConstantQuantity.SelectedIndex), initialValue, textBoxProgramConstantDuration.Text, (TimeUnits)(comboBoxProgramConstantUnit.SelectedIndex));
+                            programItem = new ProgramItem((RunMode)(comboBoxProgramConstantQuantity.SelectedIndex), initialValue, textBoxProgramConstantDuration.Text, (TimeUnits)(comboBoxProgramConstantUnit.SelectedIndex));
                         }
                     }
                     else if (tabControlProgram.SelectedItem == tabItemProgramRamp) // adds ramp program item
@@ -1151,11 +1160,11 @@ namespace MightyWatt
 
                         if (checkBoxProgramRampSkip.IsChecked == true) // skip conditions apply
                         {
-                            programItem = new ProgramItem((Modes)(comboBoxProgramRampQuantity.SelectedIndex), initialValue, Double.Parse(textBoxProgramRampFinalValue.Text), textBoxProgramRampDuration.Text, (TimeUnits)(comboBoxProgramRampDurationUnit.SelectedIndex), (Modes)(comboBoxProgramRampSkipQuantity.SelectedIndex), (Comparison)(comboBoxProgramRampSkipComparator.SelectedIndex), Double.Parse(textBoxProgramRampSkipValue.Text));
+                            programItem = new ProgramItem((RampMode)(comboBoxProgramRampQuantity.SelectedIndex), initialValue, Double.Parse(textBoxProgramRampFinalValue.Text), textBoxProgramRampDuration.Text, (TimeUnits)(comboBoxProgramRampDurationUnit.SelectedIndex), (WDandSkipMode)(comboBoxProgramRampSkipQuantity.SelectedIndex), (Comparison)(comboBoxProgramRampSkipComparator.SelectedIndex), Double.Parse(textBoxProgramRampSkipValue.Text));
                         }
                         else
                         {
-                            programItem = new ProgramItem((Modes)(comboBoxProgramRampQuantity.SelectedIndex), initialValue, Double.Parse(textBoxProgramRampFinalValue.Text), textBoxProgramRampDuration.Text, (TimeUnits)(comboBoxProgramRampDurationUnit.SelectedIndex));
+                            programItem = new ProgramItem((RampMode)(comboBoxProgramRampQuantity.SelectedIndex), initialValue, Double.Parse(textBoxProgramRampFinalValue.Text), textBoxProgramRampDuration.Text, (TimeUnits)(comboBoxProgramRampDurationUnit.SelectedIndex));
                         }
                     }
                     else /*if (tabControlProgram.SelectedItem == tabItemUserPins)*/ // adds ramp program item

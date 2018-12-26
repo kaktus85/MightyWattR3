@@ -218,7 +218,7 @@ namespace MightyWatt
 
                     if (stopped)
                     {
-                        Set(Modes.Current, 0);
+                        Set(RunMode.Current, 0);
                     }
                     dataToWrite.Enqueue(new byte[] { COMMUNICATION_READ | ((byte)ReadCommands.Measurement & 0x7F) });
 #if DEBUG
@@ -437,9 +437,9 @@ namespace MightyWatt
         }
 
         // this method handles the communication protocol of sending the data to the load
-        public void Set(Modes mode, double value)
+        public void Set(RunMode mode, double value)
         {
-            if (mode != Modes.Current || value != 0)
+            if (mode != RunMode.Current || value != 0)
             {
                 stopped = false;
             }
@@ -448,7 +448,7 @@ namespace MightyWatt
             {
                 byte[] dataItem;
                 validateValues(mode, value); // validate input
-                if (mode == Modes.SimpleAmmeter)
+                if (mode == RunMode.SimpleAmmeter)
                 {
                     dataItem = new byte[1];
                 }
@@ -470,39 +470,39 @@ namespace MightyWatt
                 UInt32 val = 0;
                 switch (mode)
                 {
-                    case Modes.Current:
+                    case RunMode.Current:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.ConstantCurrent;
                         break;
-                    case Modes.Voltage:
+                    case RunMode.Voltage:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.ConstantVoltage;
                         break;
-                    case Modes.VoltageSoftware:
+                    case RunMode.VoltageSoftware:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.ConstantVoltageSoftware;
                         break;
-                    case Modes.MPPT:
+                    case RunMode.MPPT:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.MPPT;
                         break;
-                    case Modes.Power_CC:
+                    case RunMode.Power_CC:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.ConstantPowerCC;
                         break;
-                    case Modes.Power_CV:
+                    case RunMode.Power_CV:
                         val = Convert.ToUInt32(value * 1e6);
                         dataItem[0] |= (byte)WriteCommands.ConstantPowerCV;
                         break;
-                    case Modes.Resistance_CC:
+                    case RunMode.Resistance_CC:
                         val = Convert.ToUInt32(value * 1000);
                         dataItem[0] |= (byte)WriteCommands.ConstantResistanceCC;
                         break;
-                    case Modes.Resistance_CV:
+                    case RunMode.Resistance_CV:
                         val = Convert.ToUInt32(value * 1000);
                         dataItem[0] |= (byte)WriteCommands.ConstantResistanceCV;
                         break;
-                    case Modes.SimpleAmmeter:
+                    case RunMode.SimpleAmmeter:
                         dataItem[0] |= (byte)WriteCommands.SimpleAmmeter;
                         break;
                     default:
@@ -540,13 +540,13 @@ namespace MightyWatt
         }
 
         // checks values for validity
-        private void validateValues(Modes mode, double value)
+        private void validateValues(RunMode mode, double value)
         {
             if (activePortName != null) // values are validated only when a device is connected
             {
                 switch (mode)
                 {
-                    case Modes.Current:
+                    case RunMode.Current:
                     /*case Modes.MPPT:*/
                         {
                             if ((value > MaxIadc) || (value > MaxIdac) || (value < 0))
@@ -555,8 +555,8 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.Power_CC:
-                    case Modes.Power_CV:
+                    case RunMode.Power_CC:
+                    case RunMode.Power_CV:
                         {
                             if ((value > MaxPower) || (value < 0))
                             {
@@ -564,8 +564,8 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.Resistance_CC:
-                    case Modes.Resistance_CV:
+                    case RunMode.Resistance_CC:
+                    case RunMode.Resistance_CV:
                         {
                             if ((value > DvmInputResistance) || (value < 0))
                             {
@@ -573,8 +573,8 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.Voltage:
-                    case Modes.MPPT:
+                    case RunMode.Voltage:
+                    case RunMode.MPPT:
                         {
                             if ((value > MaxVadc) || (value > MaxVdac) || (value < 0))
                             {
@@ -582,7 +582,7 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.VoltageSoftware:
+                    case RunMode.VoltageSoftware:
                         {
                             if ((value > MaxVadc) || (value < 0))
                             {
@@ -590,7 +590,7 @@ namespace MightyWatt
                             }
                             break;
                         }
-                    case Modes.SimpleAmmeter:
+                    case RunMode.SimpleAmmeter:
                         // No validation
                         break;
                     default:
@@ -608,23 +608,23 @@ namespace MightyWatt
         }
 
         // gets selected value of I, P, R or V
-        public double GetValue(Modes mode)
+        public double GetValue(RunMode mode)
         {
             switch (mode)
             {
-                case Modes.Current:
-                case Modes.SimpleAmmeter:
+                case RunMode.Current:
+                case RunMode.SimpleAmmeter:
                 /*case Modes.MPPT:*/
                     {
                         return current;
                     }
-                case Modes.Power_CC:
-                case Modes.Power_CV:
+                case RunMode.Power_CC:
+                case RunMode.Power_CV:
                     {
                         return voltage * current;
                     }
-                case Modes.Resistance_CC:
-                case Modes.Resistance_CV:
+                case RunMode.Resistance_CC:
+                case RunMode.Resistance_CV:
                     {
                         if (current == 0)
                         {
@@ -635,9 +635,9 @@ namespace MightyWatt
                             return voltage / current;
                         }
                     }
-                case Modes.Voltage:
-                case Modes.VoltageSoftware:
-                case Modes.MPPT:
+                case RunMode.Voltage:
+                case RunMode.VoltageSoftware:
+                case RunMode.MPPT:
                     {
                         return voltage;
                     }

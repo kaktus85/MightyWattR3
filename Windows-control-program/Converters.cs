@@ -81,7 +81,20 @@ namespace MightyWatt
                 // byte to string
                 try
                 {
-                    return Load.UnitSymbols[System.Convert.ToByte(value)];
+                    if ((Type)parameter == typeof(RunMode))
+                    {
+                        return ((RunMode)System.Convert.ToByte((int)value)).Symbol();
+                    }
+                    else if ((Type)parameter == typeof(RampMode))
+                    {
+                        return ((RampMode)System.Convert.ToByte((int)value)).Symbol();
+                    }
+                    else if ((Type)parameter == typeof(WDandSkipMode))
+                    {
+                        return ((WDandSkipMode)System.Convert.ToByte((int)value)).Symbol();
+                    }
+
+                    throw new NotImplementedException();
                 }
                 catch (OverflowException)
                 {
@@ -90,15 +103,8 @@ namespace MightyWatt
             }
             public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                // string to byte
-                for (byte i = 0; i < Load.UnitSymbols.Length; i++)
-                {
-                    if ((string)value == Load.UnitSymbols[i])
-                    {
-                        return i;
-                    }
-                }
-                return null;
+                // Back conversion is not possible
+                throw new NotImplementedException();
             }
         }
 

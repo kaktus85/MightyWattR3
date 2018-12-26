@@ -236,7 +236,7 @@ namespace MightyWatt
                         case ProgramModes.Constant:
                             {
                                 // mode
-                                Modes mode = (Modes)(Enum.Parse(typeof(Modes), item.Attributes.GetNamedItem("mode").Value));
+                                RunMode mode = (RunMode)(Enum.Parse(typeof(RunMode), item.Attributes.GetNamedItem("mode").Value));
 
                                 // value
                                 parameter = item.Attributes.GetNamedItem("value");
@@ -254,7 +254,7 @@ namespace MightyWatt
 
                                 // skip
                                 bool skipEnabled = false;
-                                Modes skipMode;
+                                WDandSkipMode skipMode;
                                 Comparison skipComparator;
                                 double skipValue;
                                 foreach (XmlNode node in item.ChildNodes)
@@ -262,7 +262,7 @@ namespace MightyWatt
                                     if (node.Name == "skip")
                                     {
                                         skipEnabled = true;
-                                        skipMode = (Modes)(Enum.Parse(typeof(Modes), node.Attributes.GetNamedItem("mode").Value));
+                                        skipMode = (WDandSkipMode)(Enum.Parse(typeof(WDandSkipMode), node.Attributes.GetNamedItem("mode").Value));
                                         skipComparator = (Comparison)(Enum.Parse(typeof(Comparison), node.Attributes.GetNamedItem("comparator").Value));
                                         skipValue = Double.Parse(node.Attributes.GetNamedItem("value").Value);
                                         programItems.Add(new ProgramItem(mode, value, durationString, timeunit, skipMode, skipComparator, skipValue));
@@ -278,7 +278,7 @@ namespace MightyWatt
                         case ProgramModes.Ramp:
                             {
                                 // mode
-                                Modes mode = (Modes)(Enum.Parse(typeof(Modes), item.Attributes.GetNamedItem("mode").Value));
+                                RampMode mode = (RampMode)(Enum.Parse(typeof(RampMode), item.Attributes.GetNamedItem("mode").Value));
 
                                 // starting value
                                 parameter = item.Attributes.GetNamedItem("startingValue");
@@ -301,7 +301,7 @@ namespace MightyWatt
 
                                 // skip
                                 bool skipEnabled = false;
-                                Modes skipMode;
+                                WDandSkipMode skipMode;
                                 Comparison skipComparator;
                                 double skipValue;
                                 foreach (XmlNode node in item.ChildNodes)
@@ -309,7 +309,7 @@ namespace MightyWatt
                                     if (node.Name == "skip")
                                     {
                                         skipEnabled = true;
-                                        skipMode = (Modes)(Enum.Parse(typeof(Modes), node.Attributes.GetNamedItem("mode").Value));
+                                        skipMode = (WDandSkipMode)(Enum.Parse(typeof(WDandSkipMode), node.Attributes.GetNamedItem("mode").Value));
                                         skipComparator = (Comparison)(Enum.Parse(typeof(Comparison), node.Attributes.GetNamedItem("comparator").Value));
                                         skipValue = Double.Parse(node.Attributes.GetNamedItem("value").Value);
                                         programItems.Add(new ProgramItem(mode, startingValue, finalValue, durationString, timeunit, skipMode, skipComparator, skipValue));

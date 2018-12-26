@@ -9,19 +9,9 @@ using System.ComponentModel;
 
 namespace MightyWatt
 {
-    public enum Modes : byte { Current, Voltage, Power_CC, Power_CV, Resistance_CC, Resistance_CV, VoltageSoftware, MPPT, SimpleAmmeter };
-    public enum TimeUnits : byte { ms, s, min, h }
-    public enum Comparison { LessThan, MoreThan }
-    public enum ProgramModes : byte { Constant, Ramp, Pin };
-    public enum Boards : byte { Zero, Uno };
-    public enum LEDBrightnesses : byte { Off = 0, Low = 23, Medium = 105, High = 255 }; // Pre-defined brightness levels using 2.2 gamma correction
-    public enum LEDRules : byte { AlwaysOff = 0, P1 = 1, V1 = 2, I1 = 4, P10 = 8, V10 = 16, I10 = 32, T50 = 64, AlwaysOn = 128 };
-    public enum FanRules : byte { AlwaysOn, AutoCool, AutoQuiet };
-    public enum MeasurementFilters : byte { UnfilteredNoADCAutoranging, Unfiltered, Filtered };
-
     public delegate void GuiUpdateDelegate();
     public delegate void WatchdogStopDelegate();
-    public delegate void ErrorDelegate(string error);    
+    public delegate void ErrorDelegate(string error);        
 
     public class Load : INotifyPropertyChanged
     {
@@ -45,9 +35,9 @@ namespace MightyWatt
         public int TotalLoops { get; set; } // total number of loops, 0 for infinite
 
         // GUI
-        public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker", "Simple ammeter" };
-        public static readonly string[] ModeNamesWatchdogAndSkip = { "Current", "Voltage", "Power", "Power", "Resistance", "Resistance", "Voltage", "Voltage", "Current" };
-        public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V", ""};
+        //public static readonly string[] ModeNames = { "Current", "Voltage", "Power (CC)", "Power (CV)", "Resistance (CC)", "Resistance (CV)", "SW controlled voltage", "Max power point tracker", "Simple ammeter", "Temperature" };
+        //public static readonly string[] ModeNamesWatchdogAndSkip = { "Current", "Voltage", "Power", "Power", "Resistance", "Resistance", "Voltage", "Voltage", "Current", "Temperature" };
+        //public static readonly string[] UnitSymbols = { "A", "V", "W", "W", "Ω", "Ω", "V", "V", "", "°C"};
         public static readonly string[] Pins = {"Arduino pin 2", "Arduino pin 6", "Arduino pin 7", "Arduino pin 10", "Arduino pin 13"};
         DateTime lastGuiUpdate = DateTime.Now;
         private double guiUpdatePeriod = 0.2;
@@ -63,7 +53,7 @@ namespace MightyWatt
         // watchdog
         public event WatchdogStopDelegate WatchdogStop; // event that is raised when watchdog has stopped the load
         public bool WatchdogEnabled { get; set; }
-        public Modes WatchdogMode { get; set; }
+        public WDandSkipMode WatchdogMode { get; set; }
         public Comparison WatchdogCompare { get; set; }
         public string WatchdogValue { get; set; }
 
@@ -146,7 +136,7 @@ namespace MightyWatt
                 device.SetValue(WriteCommands.MeasurementFilter, (byte)MeasurementFilter);
                 device.SetValue(WriteCommands.CurrentRangeAuto, Convert.ToByte(AutorangingCurrent));
                 device.SetValue(WriteCommands.VoltageRangeAuto, Convert.ToByte(AutorangingVoltage));
-                device.Set(Modes.Current, 0);
+                device.Set(RunMode.Current, 0);
             }
             catch (IOException ex)
             {
@@ -185,7 +175,7 @@ namespace MightyWatt
         }
 
         // passes the set method
-        public void Set(Modes mode, double value)
+        public void Set(RunMode mode, double value)
         {
             device.Set(mode, value);
         }
@@ -488,33 +478,95 @@ namespace MightyWatt
 
         // compares the current measured quantity to a given value
         // returns true if the measured quantity is less than / more than [comparator] the given value
-        private bool valueComparer(double value, Modes mode, Comparison comparator)
+        private bool valueComparer(double value, RunMode mode, Comparison comparator)
         {
             switch (mode)
             {
-                case Modes.Current:
-                case Modes.SimpleAmmeter:
+                case RunMode.Current:
+                case RunMode.SimpleAmmeter:
                     {
                         return (comparator == Comparison.LessThan) == (Current < value);
                     }
-                case Modes.MPPT:
-                case Modes.Power_CC:
-                case Modes.Power_CV:
+                case RunMode.MPPT:
+                case RunMode.Power_CC:
+                case RunMode.Power_CV:
                     {
                         return (comparator == Comparison.LessThan) == (Power < value);
                     }
-                case Modes.Resistance_CC:
-                case Modes.Resistance_CV:
+                case RunMode.Resistance_CC:
+                case RunMode.Resistance_CV:
                     {
                         return (comparator == Comparison.LessThan) == (Resistance < value);
                     }
-                case Modes.Voltage:
-                case Modes.VoltageSoftware:
+                case RunMode.Voltage:
+                case RunMode.VoltageSoftware:
                     {
                         return (comparator == Comparison.LessThan) == (Voltage < value);
                     }
             }
-            return false;
+
+            throw new NotImplementedException();
+        }
+
+        // compares the current measured quantity to a given value
+        // returns true if the measured quantity is less than / more than [comparator] the given value
+        private bool valueComparer(double value, WDandSkipMode mode, Comparison comparator)
+        {
+            switch (mode)
+            {
+                case WDandSkipMode.Current:
+                    {
+                        return (comparator == Comparison.LessThan) == (Current < value);
+                    }
+                case WDandSkipMode.Voltage:
+                    {
+                        return (comparator == Comparison.LessThan) == (Voltage < value);
+                    }
+                case WDandSkipMode.Power:
+                    {
+                        return (comparator == Comparison.LessThan) == (Power < value);
+                    }
+                case WDandSkipMode.Resistance:
+                    {
+                        return (comparator == Comparison.LessThan) == (Resistance < value);
+                    }
+                case WDandSkipMode.Temperature:
+                    {
+                        return (comparator == Comparison.LessThan) == (Temperature < value);
+                    }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        // compares the current measured quantity to a given value
+        // returns true if the measured quantity is less than / more than [comparator] the given value
+        private bool valueComparer(double value, RampMode mode, Comparison comparator)
+        {
+            switch (mode)
+            {
+                case RampMode.Current:
+                    {
+                        return (comparator == Comparison.LessThan) == (Current < value);
+                    }
+                case RampMode.Power_CC:
+                case RampMode.Power_CV:
+                    {
+                        return (comparator == Comparison.LessThan) == (Power < value);
+                    }
+                case RampMode.Resistance_CC:
+                case RampMode.Resistance_CV:
+                    {
+                        return (comparator == Comparison.LessThan) == (Resistance < value);
+                    }
+                case RampMode.Voltage:
+                case RampMode.VoltageSoftware:
+                    {
+                        return (comparator == Comparison.LessThan) == (Voltage < value);
+                    }
+            }
+
+            throw new NotImplementedException();
         }
 
         // stops the load and raises WatchdogStop event
@@ -696,7 +748,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Voltage);
+                return this.device.GetValue(RunMode.Voltage);
             }
         }
 
@@ -704,7 +756,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Current);
+                return this.device.GetValue(RunMode.Current);
             }
         }
 
@@ -712,7 +764,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Power_CC);
+                return this.device.GetValue(RunMode.Power_CC);
             }
         }
 
@@ -720,7 +772,7 @@ namespace MightyWatt
         {
             get
             {
-                return this.device.GetValue(Modes.Resistance_CC);
+                return this.device.GetValue(RunMode.Resistance_CC);
             }
         }
 

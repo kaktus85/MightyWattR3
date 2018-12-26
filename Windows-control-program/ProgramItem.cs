@@ -5,40 +5,40 @@ namespace MightyWatt
     public class ProgramItem
     {
         private ProgramModes programMode;
-        private Modes mode;
+        private RunMode mode;
         private string durationString;
         private double duration; // duration in seconds
         private TimeUnits timeUnit;
         private double? value, startingValue;
         private double finalValue;
         private bool skipEnabled;
-        private Modes skipMode;
+        private WDandSkipMode skipMode;
         private Comparison skipComparator;
         private double skipValue;
         private string name = "Empty";
         private const string NUMBER_FORMAT = "g";
 
         // constructor for constant mode
-        public ProgramItem(Modes mode, double? value, string durationString, TimeUnits timeUnit)
+        public ProgramItem(RunMode mode, double? value, string durationString, TimeUnits timeUnit)
         {
             constant(mode, value, durationString, timeUnit);
         }
 
         // constructor for constant mode with skip
-        public ProgramItem(Modes mode, double? value, string durationString, TimeUnits timeUnit, Modes skipMode, Comparison skipComparator, double skipValue)
+        public ProgramItem(RunMode mode, double? value, string durationString, TimeUnits timeUnit, WDandSkipMode skipMode, Comparison skipComparator, double skipValue)
         {
             constant(mode, value, durationString, timeUnit);
             skip(skipMode, skipComparator, skipValue);
         }
 
         // constructor for ramp mode
-        public ProgramItem(Modes mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit)
+        public ProgramItem(RampMode mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit)
         {
             ramp(mode, startingValue, finalValue, durationString, timeUnit);
         }
 
         // constructor for ramp mode with skip
-        public ProgramItem(Modes mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit, Modes skipMode, Comparison skipComparator, double skipValue)
+        public ProgramItem(RampMode mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit, WDandSkipMode skipMode, Comparison skipComparator, double skipValue)
         {
             ramp(mode, startingValue, finalValue, durationString, timeUnit);
             skip(skipMode, skipComparator, skipValue);
@@ -51,7 +51,7 @@ namespace MightyWatt
         }
 
         // creates constant mode program item
-        private void constant(Modes mode, double? value, string durationString, TimeUnits timeUnit)
+        private void constant(RunMode mode, double? value, string durationString, TimeUnits timeUnit)
         {                        
             this.programMode = ProgramModes.Constant;
             this.mode = mode;
@@ -67,7 +67,7 @@ namespace MightyWatt
             // string representation for GUI
             switch (mode)
             {
-                case Modes.Current:
+                case RunMode.Current:
                     {
                         if (value != null)
                         {
@@ -79,7 +79,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power_CC:
+                case RunMode.Power_CC:
                     {
                         if (value != null)
                         {
@@ -91,7 +91,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power_CV:
+                case RunMode.Power_CV:
                     {
                         if (value != null)
                         {
@@ -103,7 +103,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Resistance_CC:
+                case RunMode.Resistance_CC:
                     {
                         if (value != null)
                         {
@@ -115,7 +115,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Resistance_CV:
+                case RunMode.Resistance_CV:
                     {
                         if (value != null)
                         {
@@ -127,7 +127,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Voltage:
+                case RunMode.Voltage:
                     {
                         if (value != null)
                         {
@@ -139,7 +139,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.VoltageSoftware:
+                case RunMode.VoltageSoftware:
                     {
                         if (value != null)
                         {
@@ -151,7 +151,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.MPPT:
+                case RunMode.MPPT:
                     {
                         if (value != null)
                         {
@@ -166,7 +166,7 @@ namespace MightyWatt
 
                         break;
                     }
-                case Modes.SimpleAmmeter:
+                case RunMode.SimpleAmmeter:
                     {
                         name = "Simple ammeter, " + durationString + " " + timeUnit.ToString();
                         break;
@@ -175,11 +175,11 @@ namespace MightyWatt
         }
 
         // creates ramp mode program item
-        private void ramp(Modes mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit)
+        private void ramp(RampMode mode, double? startingValue, double finalValue, string durationString, TimeUnits timeUnit)
         {
 
             this.programMode = ProgramModes.Ramp;
-            this.mode = mode;
+            this.mode = mode.ToRunMode();
             this.durationString = durationString;
             this.timeUnit = timeUnit;
             this.startingValue = startingValue;
@@ -192,7 +192,7 @@ namespace MightyWatt
             // string representation for GUI
             switch (mode)
             {
-                case Modes.Current:
+                case RampMode.Current:
                     {
                         if (startingValue != null)
                         {
@@ -204,7 +204,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power_CC:
+                case RampMode.Power_CC:
                     {
                         if (startingValue != null)
                         {
@@ -216,7 +216,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Power_CV:
+                case RampMode.Power_CV:
                     {
                         if (startingValue != null)
                         {
@@ -228,7 +228,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Resistance_CC:
+                case RampMode.Resistance_CC:
                     {
                         if (startingValue != null)
                         {
@@ -240,7 +240,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Resistance_CV:
+                case RampMode.Resistance_CV:
                     {
                         if (startingValue != null)
                         {
@@ -252,7 +252,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.Voltage:
+                case RampMode.Voltage:
                     {
                         if (startingValue != null)
                         {
@@ -264,7 +264,7 @@ namespace MightyWatt
                         }
                         break;
                     }
-                case Modes.VoltageSoftware:
+                case RampMode.VoltageSoftware:
                     {
                         if (startingValue != null)
                         {
@@ -309,7 +309,7 @@ namespace MightyWatt
         }
 
         // adds skip condition to program item
-        private void skip(Modes skipMode, Comparison skipComparator, double skipValue)
+        private void skip(WDandSkipMode skipMode, Comparison skipComparator, double skipValue)
         {
             this.skipMode = skipMode;
             this.skipComparator = skipComparator;
@@ -319,8 +319,7 @@ namespace MightyWatt
 
             switch (this.skipMode)
             {
-                case Modes.Current:
-                case Modes.SimpleAmmeter:
+                case WDandSkipMode.Current:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
@@ -333,9 +332,7 @@ namespace MightyWatt
                         this.name += skipValue.ToString(NUMBER_FORMAT) + " A";
                         break;
                     }
-                case Modes.MPPT:
-                case Modes.Power_CC:
-                case Modes.Power_CV:
+                case WDandSkipMode.Power:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
@@ -348,8 +345,7 @@ namespace MightyWatt
                         this.name += skipValue.ToString(NUMBER_FORMAT) + " W";
                         break;
                     }
-                case Modes.Resistance_CC:
-                case Modes.Resistance_CV:
+                case WDandSkipMode.Resistance:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
@@ -362,8 +358,7 @@ namespace MightyWatt
                         this.name += skipValue.ToString(NUMBER_FORMAT) + " Ω";
                         break;
                     }
-                case Modes.Voltage:
-                case Modes.VoltageSoftware:
+                case WDandSkipMode.Voltage:
                     {
                         if (this.skipComparator == Comparison.LessThan)
                         {
@@ -374,6 +369,19 @@ namespace MightyWatt
                             this.name += "voltage > ";
                         }
                         this.name += skipValue.ToString(NUMBER_FORMAT) + " V";
+                        break;
+                    }
+                case WDandSkipMode.Temperature:
+                    {
+                        if (this.skipComparator == Comparison.LessThan)
+                        {
+                            this.name += "temperature < ";
+                        }
+                        else
+                        {
+                            this.name += "temperature > ";
+                        }
+                        this.name += skipValue.ToString(NUMBER_FORMAT) + " °C";
                         break;
                     }
             }
@@ -392,7 +400,7 @@ namespace MightyWatt
             }
         }
 
-        public Modes Mode
+        public RunMode Mode
         {
             get
             {
@@ -456,7 +464,7 @@ namespace MightyWatt
             }
         }
 
-        public Modes SkipMode
+        public WDandSkipMode SkipMode
         {
             get
             {

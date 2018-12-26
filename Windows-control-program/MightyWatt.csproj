@@ -93,6 +93,7 @@
     </Compile>
     <Compile Include="Communication.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="Enumerations.cs" />
     <Compile Include="File.cs" />
     <Compile Include="Load.cs" />
     <Compile Include="Plot\Plot.cs" />
