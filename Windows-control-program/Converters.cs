@@ -45,8 +45,12 @@ namespace MightyWatt
             }
             public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                // string to double
-                return Double.Parse((string)value);
+                // string to double                
+                if (String.IsNullOrEmpty((string)value))
+                {
+                    return 0;
+                }
+                return Double.Parse((string)value, NumberStyles.Float);
             }
         }
 

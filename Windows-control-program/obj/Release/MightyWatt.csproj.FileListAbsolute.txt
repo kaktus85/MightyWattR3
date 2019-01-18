@@ -24,3 +24,4 @@ C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.csp
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.csproj.CoreCompileInputs.cache
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.exe
 C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.pdb
+C:\Dokumenty\Git\MightyWattR3\Windows-control-program\obj\Release\MightyWatt.csprojAssemblyReference.cache

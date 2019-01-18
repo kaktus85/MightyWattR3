@@ -318,11 +318,14 @@ namespace MightyWatt
             this.comboBoxWatchdogComparator.SetBinding(ComboBox.SelectedIndexProperty, this.watchdogComparisonBinding);
 
             // watchdog value binding (string)
-            watchdogValueBinding = new Binding();
-            watchdogValueBinding.Path = new PropertyPath("WatchdogValue");
-            watchdogValueBinding.Source = this.load;
-            watchdogValueBinding.Mode = BindingMode.OneWayToSource;
-            this.textBoxWatchdogValue.SetBinding(TextBox.TextProperty, this.watchdogValueBinding);
+            watchdogValueBinding = new Binding
+            {
+                Path = new PropertyPath("WatchdogValue"),
+                Source = load,
+                Mode = BindingMode.OneWayToSource,                
+            };
+            watchdogValueBinding.ValidationRules.Add(new DoubleRule());            
+            textBoxWatchdogValue.SetBinding(TextBox.TextProperty, watchdogValueBinding);
 
             // local binding
             localBinding = new Binding();
@@ -1771,6 +1774,52 @@ namespace MightyWatt
         private void menuItemResources_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.OpenResourcesInBrowser();
+        }
+    }
+
+    public class DoubleRule : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            if (string.IsNullOrEmpty((string)value))
+            {
+                return new ValidationResult(true, null);
+            }
+            else
+            {
+                try
+                {
+                    double.Parse((string)value);
+                    return new ValidationResult(true, null);
+                }
+                catch (Exception ex)
+                {
+                    return new ValidationResult(false, ex.Message);
+                }             
+            }
+        }
+    }
+
+    public class UintRule : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            if (string.IsNullOrEmpty((string)value))
+            {
+                return new ValidationResult(true, null);
+            }
+            else
+            {
+                try
+                {
+                    UInt32.Parse((string)value);
+                    return new ValidationResult(true, null);
+                }
+                catch (Exception ex)
+                {
+                    return new ValidationResult(false, ex.Message);
+                }
+            }
         }
     }
 }
