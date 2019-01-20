@@ -1103,6 +1103,13 @@ namespace MightyWatt
             {
                 try
                 {
+                    DoubleRule doubleRule = new DoubleRule();
+                    ValidationResult vr = doubleRule.Validate(textBoxWatchdogValue.Text, CultureInfo.CurrentCulture);
+                    if (vr.IsValid == false)
+                    {
+                        throw new FormatException("Watchdog value error: " + vr.ErrorContent.ToString());
+                    }
+
                     this.load.Set((RunMode)(comboBoxManualQuantity.SelectedIndex), Double.Parse(textBoxManualValue.Text));
                 }
                 catch (Exception ex)

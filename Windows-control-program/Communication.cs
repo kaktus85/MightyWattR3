@@ -558,10 +558,11 @@ namespace MightyWatt
                     case RunMode.Power_CC:
                     case RunMode.Power_CV:
                         {
-                            if ((value > MaxPower) || (value < 0))
-                            {
-                                throw new ArgumentOutOfRangeException("Set power out of range.", (Exception)null);
-                            }
+                            /* The power limitation will be handled in hardware */
+                            //if ((value > MaxPower) || (value < 0))
+                            //{
+                            //    throw new ArgumentOutOfRangeException("Set power out of range.", (Exception)null);
+                            //}
                             break;
                         }
                     case RunMode.Resistance_CC:
