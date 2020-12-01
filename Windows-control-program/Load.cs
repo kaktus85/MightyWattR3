@@ -267,6 +267,7 @@ namespace MightyWatt
             }
             programItemsStartTime.Add(DateTime.Now);
             // loop
+            bool isMPPTSet = false; // MPPT can be set only once
             while (((DateTime.Now - programItemsStartTime[programItemNumber]).TotalSeconds < ProgramItems[programItemNumber].Duration) && (cancel == false))
             {
                 if (ProgramItems[programItemNumber].SkipEnabled) // check skip condition
@@ -282,7 +283,12 @@ namespace MightyWatt
                     System.Threading.Thread.Sleep(10); // decrease CPU load
                 }
 
-                device.Set(ProgramItems[programItemNumber].Mode, setValue);
+                if (ProgramItems[programItemNumber].Mode != RunMode.MPPT || false == isMPPTSet) // MPPT can be set only once
+                {
+                    // Set value in constant mode (once for MPPT, repeatedly for other modes)
+                    device.Set(ProgramItems[programItemNumber].Mode, setValue);
+                    isMPPTSet = true;
+                }
             }
             cancel = false;
         }
