@@ -27,6 +27,7 @@ static RangeSwitcher_VoltageRanges voltageRange = VOLTAGE_DEFAULT_HARDWARE_RANGE
 static bool currentRangeAuto, voltageRangeAuto; /* Defines whether the load can use autoranging by voltage setter and current setter. If true, it can, if false, the range will be fixed on high range */
 static const Communication_WriteCommand * writeCommand; /* Pointer to the write command where new data from communication can be found */
 static uint8_t commandCounter; /* Number of the last executed command from communication */
+static bool currentRangeChanged, voltageRangeChanged; /* True if range was changed since last time */
 
 /* </Module variables> */ 
 
@@ -43,6 +44,8 @@ void RangeSwitcher_Init(void)
   voltageRangeAuto = true;
   writeCommand = Communication_GetWriteCommand();
   commandCounter = 0;
+  currentRangeChanged = false;
+  voltageRangeChanged = false;
 }
 
 void RangeSwitcher_Do(void)
@@ -68,7 +71,8 @@ void RangeSwitcher_Do(void)
 }
 
 void RangeSwitcher_SetCurrentRange(RangeSwitcher_CurrentRanges range)
-{  
+{    
+  currentRangeChanged |= currentRange != range;
   currentRange = range;
   
   switch (currentRange)
@@ -86,6 +90,7 @@ void RangeSwitcher_SetCurrentRange(RangeSwitcher_CurrentRanges range)
 
 void RangeSwitcher_SetVoltageRange(RangeSwitcher_VoltageRanges range)
 {  
+  voltageRangeChanged |= voltageRange != range;
   voltageRange = range;
 
   switch (voltageRange)
@@ -99,6 +104,20 @@ void RangeSwitcher_SetVoltageRange(RangeSwitcher_VoltageRanges range)
     default:
     break;
   }
+}
+
+bool RangeSwitcher_HasCurrentRangeChanged(void)
+{
+  bool result = currentRangeChanged;
+  currentRangeChanged = false;
+  return result;
+}
+
+bool RangeSwitcher_HasVoltageRangeChanged(void)
+{
+  bool result = voltageRangeChanged;
+  voltageRangeChanged = false;
+  return result;
 }
 
 RangeSwitcher_CurrentRanges RangeSwitcher_GetCurrentRange(void)
@@ -122,4 +141,3 @@ bool RangeSwitcher_CanAutorangeVoltage(void)
 }
 
 /* </Implementations> */ 
-

@@ -133,7 +133,8 @@ void ADC_Do(void) /* Call periodically */
   {
     repeatedConversion = false;
     rawResult = ADS1x15_GetRawResult();    
-    int32_t result = ADS1x15_Voltage(rawResult, ChannelSettings[i].range); /* Get the new voltage */     
+    int32_t result = ADS1x15_Voltage(rawResult, ChannelSettings[i].range); /* Get the new voltage */         
+    
     if ((result > ADC_ABSOLUTEMAXIMUM) || (result < -ADC_ABSOLUTEMAXIMUM))
     {
       /* ADC negative or positive overload */
@@ -171,7 +172,7 @@ void ADC_Do(void) /* Call periodically */
         i++;
         if (i == ADC_CHANNEL_COUNT) /* Wrap around the number of channels */
         {
-          i = 0;      
+          i = 0;
         }
         ChannelCycleCounter[i]++; /* Increase cycle number */
 
@@ -182,7 +183,7 @@ void ADC_Do(void) /* Call periodically */
       }
     } while ((ChannelCycleCounter[i] & ((1U << ChannelSkipRatio[i])) - 1U) > 0); /* Channel skipping */
     
-    ADS1x15_StartConversion(ChannelSettings[i]); /* Start converting the next channel */    
+    ADS1x15_StartConversion(ChannelSettings[i]); /* Start converting the next channel */
   }
   
   if ((millis() - LastUpdate) > ADC_TIMEOUT)
@@ -259,6 +260,24 @@ int32_t TriangleFilter_GetUnfilteredValue(ADC_TriangleFilterData * filter)
   {
     return (filter->data)[filter->filterSize - 1];
   }
+}
+
+void ADC_ResetFilter(ADC_Channels adcChannel)
+{
+  if (adcChannel < ADC_CHANNEL_COUNT)
+  {
+      ADC_TriangleFilterData * filter = &(Filters[adcChannel]);
+      int32_t lastValue = TriangleFilter_GetUnfilteredValue(filter);
+      
+      // Reset filter
+      filter->index = 0;
+      filter->sum = 0;
+      filter->triangleSum = 0;
+      filter->valid = false;
+      memset(filter->data, 0, filter->filterSize * sizeof(int32_t));
+
+      TriangleFilter_Add(lastValue, filter); // add the last value
+   }
 }
 
 /* </Implementations> */ 

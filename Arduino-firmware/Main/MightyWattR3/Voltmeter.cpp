@@ -54,6 +54,7 @@ static uint8_t adcCounter, adcErrorCounter, commandCounter;
 static ErrorMessaging_Error VoltmeterError;
 const static ErrorMessaging_Error * ADCError;
 const static Communication_WriteCommand * writeCommand;
+static bool resetFilter;
 
 /* </Module variables> */ 
 
@@ -76,6 +77,7 @@ void Voltmeter_Init(void)
   adcErrorCounter = ADCError->errorCounter;
   writeCommand = Communication_GetWriteCommand();
   commandCounter = writeCommand->commandCounter;
+  resetFilter = false;  
 }
 
 void Voltmeter_Do(void)
@@ -91,6 +93,14 @@ void Voltmeter_ProcessADC(void)
   if (adcCounter != ADCRaw->counter) /* Process only new reading from ADC */
   {  
     adcCounter = ADCRaw->counter;
+
+    if (resetFilter)
+    {
+      ADC_ResetFilter(ADC_V); // Reset filter to remove values measured at other range
+      resetFilter = false;   
+      return;   
+    }
+    
     int32_t signedVoltage, signedUnfilteredVoltage;
 
     /* Finite state machine for hardware autoranging */
@@ -119,6 +129,7 @@ void Voltmeter_ProcessADC(void)
           if ((ADCError->error == ErrorMessaging_ADC_Overload) && (Control_GetCCCV() != Control_CCCV_CV))
           {   
             RangeSwitcher_SetVoltageRange(VoltageRange_HighVoltage);
+            resetFilter = RangeSwitcher_HasVoltageRangeChanged(); // Reset filter to remove values measured at other range
             return;
           }      
         }
@@ -136,41 +147,51 @@ void Voltmeter_ProcessADC(void)
       VoltmeterError.errorCounter++;
       VoltmeterError.error = ErrorMessaging_Voltmeter_NegativeVoltage;
     }
+
+    uint32_t newFilteredVoltage;
+    uint32_t newUnfilteredVoltage;
     
     if (signedVoltage < 0)
     {
-      voltage.value = 0; /* Negative voltage not reported */
+      newFilteredVoltage = 0; /* Negative voltage not reported */
     }
     else
     {
-      voltage.value = (uint32_t)signedVoltage;
+      newFilteredVoltage = (uint32_t)signedVoltage;
     }
 
     if (signedUnfilteredVoltage < 0)
     {
-      voltage.unfilteredValue = 0; /* Negative voltage not reported */
+      newUnfilteredVoltage = 0; /* Negative voltage not reported */
     }
     else
     {
-      voltage.unfilteredValue = (uint32_t)signedUnfilteredVoltage;
+      newUnfilteredVoltage = (uint32_t)signedUnfilteredVoltage;
     }
 
     /* Calculate range if not in CV mode */
     if (Control_GetCCCV() != Control_CCCV_CV)
     {  
-      if (voltage.unfilteredValue > VOLTMETER_HYSTERESIS_UP)
+      if (newUnfilteredVoltage > VOLTMETER_HYSTERESIS_UP)
       {
         range = VoltageRange_HighVoltage;
       }
-      else if (voltage.unfilteredValue < VOLTMETER_HYSTERESIS_DOWN)
+      else if (newUnfilteredVoltage < VOLTMETER_HYSTERESIS_DOWN)
       {
         range = VoltageRange_LowVoltage;
       }
       RangeSwitcher_SetVoltageRange(range);
     }
-    
-    voltage.counter++;
-    voltage.milliseconds = millis();
+
+    resetFilter |= RangeSwitcher_HasVoltageRangeChanged(); // Reset filter to remove values measured at other range
+
+    if (false == resetFilter)
+    {
+      voltage.value = newFilteredVoltage;
+      voltage.unfilteredValue = newUnfilteredVoltage;
+      voltage.counter++;
+      voltage.milliseconds = millis();
+    }
   }
 }
 

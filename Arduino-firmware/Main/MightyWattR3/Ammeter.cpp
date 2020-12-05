@@ -27,6 +27,7 @@ static TSCADCULong current; /* contains current in microamps */
 static uint8_t adcCounter, adcErrorCounter;
 static ErrorMessaging_Error AmmeterError;
 const static ErrorMessaging_Error * ADCError;
+static bool resetFilter;
 
 /* </Module variables> */ 
 
@@ -46,6 +47,7 @@ void Ammeter_Init(void)
   AmmeterError.error = ErrorMessaging_Ammeter_CurrentOverload;
   ADCError = ADC_GetError(ADC_I);
   adcErrorCounter = ADCError->errorCounter;
+  resetFilter = false;
 }
 
 void Ammeter_Do(void)
@@ -56,6 +58,14 @@ void Ammeter_Do(void)
   if (adcCounter != ADCRaw->counter) /* Process only new reading from ADC */
   {      
     adcCounter = ADCRaw->counter;
+        
+    if (resetFilter)
+    {
+      resetFilter = false;
+      ADC_ResetFilter(ADC_I); // Reset filter to remove values measured at other range
+      return;
+    }
+    
     /* Finite state machine for hardware autoranging */
     switch (range)
     {
@@ -80,7 +90,8 @@ void Ammeter_Do(void)
           adcErrorCounter = ADCError->errorCounter;
           if ((ADCError->error == ErrorMessaging_ADC_Overload) && (Control_GetCCCV() != Control_CCCV_CC))
           {
-            RangeSwitcher_SetCurrentRange(CurrentRange_HighCurrent);
+            RangeSwitcher_SetCurrentRange(CurrentRange_HighCurrent);            
+            resetFilter = RangeSwitcher_HasCurrentRangeChanged(); // Reset filter to remove values measured at other range
             return;
           }          
         }
@@ -99,41 +110,50 @@ void Ammeter_Do(void)
       AmmeterError.errorCounter++;      
       AmmeterError.error = ErrorMessaging_Ammeter_NegativeCurrent;
     }
+
+    uint32_t newFilteredCurrent;
+    uint32_t newUnfilteredCurrent;
     
     if (signedCurrent < 0)
     {
-      current.value = 0; /* Negative current not reported */
+      newFilteredCurrent = 0; /* Negative current not reported */
     }
     else
     {
-      current.value = (uint32_t)signedCurrent;
+      newFilteredCurrent = (uint32_t)signedCurrent;
     }
 
     if (signedUnfilteredCurrent < 0)
     {
-      current.unfilteredValue = 0; /* Negative current not reported */
+      newUnfilteredCurrent = 0; /* Negative current not reported */
     }
     else
     {
-      current.unfilteredValue = (uint32_t)signedUnfilteredCurrent;
+      newUnfilteredCurrent = (uint32_t)signedUnfilteredCurrent;
     }
 
-    /* Calculate range if not in CC mode */
     if (Control_GetCCCV() != Control_CCCV_CC)
     {  
-      if (current.unfilteredValue > AMMETER_HYSTERESIS_UP)
+      if (newUnfilteredCurrent > AMMETER_HYSTERESIS_UP)
       {
         range = CurrentRange_HighCurrent;
       }
-      else if (current.unfilteredValue < AMMETER_HYSTERESIS_DOWN)
+      else if (newUnfilteredCurrent < AMMETER_HYSTERESIS_DOWN)
       {
         range = CurrentRange_LowCurrent;
       }
       RangeSwitcher_SetCurrentRange(range);
     }
 
-    current.counter++;
-    current.milliseconds = millis();
+    resetFilter |= RangeSwitcher_HasCurrentRangeChanged(); // Reset filter to remove values measured at other range
+
+    if (false == resetFilter)
+    {
+      current.value = newFilteredCurrent;
+      current.unfilteredValue = newUnfilteredCurrent;
+      current.counter++;
+      current.milliseconds = millis();
+    }
   }
 }
 

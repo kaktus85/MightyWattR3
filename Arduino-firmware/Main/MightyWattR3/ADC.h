@@ -121,6 +121,14 @@ const TSCADCLong * ADC_GetVoltage(ADC_Channels adcChannel);
  */
 const ErrorMessaging_Error * ADC_GetError(ADC_Channels adcChannel);
 
+/**
+ * Resets raw voltage filter for given channel
+ * Useful when physical range is switched and the values in filter are from an old range
+ * 
+ * @param adcChannel - ADC channel whose filter should be flushed
+ */
+void ADC_ResetFilter(ADC_Channels adcChannel);
+
 /* </Declarations (prototypes)> */ 
 
 #endif /* ADC_H */

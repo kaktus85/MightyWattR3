@@ -78,6 +78,20 @@ void RangeSwitcher_SetCurrentRange(RangeSwitcher_CurrentRanges range);
 void RangeSwitcher_SetVoltageRange(RangeSwitcher_VoltageRanges range);
 
 /**
+ * Gets whether current range was changed since last query of this function
+ * 
+ * @return - True if the range was changed, false otherwise
+ */
+bool RangeSwitcher_HasCurrentRangeChanged(void);
+
+/**
+ * Gets whether voltage range was changed since last query of this function
+ * 
+ * @return - True if the range was changed, false otherwise
+ */
+bool RangeSwitcher_HasVoltageRangeChanged(void);
+
+/**
  * Gets the hardware range of the ammeter / current setter
  *
  * @return - the current range setting
