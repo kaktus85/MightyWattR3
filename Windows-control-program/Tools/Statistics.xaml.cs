@@ -304,6 +304,7 @@ namespace MightyWatt
             sb.Append(File.delimiter);
             sb.Append("Ω");
             log.WriteLine(sb.ToString());
+            log.Flush();
 
             lastLogTime = DateTime.Now;
         }
