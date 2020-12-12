@@ -63,6 +63,7 @@ void Ammeter_Do(void)
     {
       resetFilter = false;
       ADC_ResetFilter(ADC_I); // Reset filter to remove values measured at other range
+      ADC_ResetFilter(ADC_V); // Reset also voltage filter to not have one filtered and other unfiltered values
       return;
     }
     

@@ -97,6 +97,7 @@ void Voltmeter_ProcessADC(void)
     if (resetFilter)
     {
       ADC_ResetFilter(ADC_V); // Reset filter to remove values measured at other range
+      ADC_ResetFilter(ADC_I); // Reset also current filter to not have one filtered and other unfiltered values
       resetFilter = false;   
       return;   
     }

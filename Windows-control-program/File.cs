@@ -34,8 +34,11 @@ namespace MightyWatt
         // closes the file
         public void Close()
         {
-            file.Flush();
-            file.Close();
+            if (file?.BaseStream.CanWrite == true)
+            {
+                file.Flush();
+            }
+            file?.Close();
             filePath = null;
         }
 
