@@ -43,7 +43,8 @@ namespace MightyWatt
         private Plot gnuPlot = null;
         private PlotData m1, m15, h4, d1, d7;
         private PlotTimeSpan plotTimeSpan;
-        private const string gnuPlotDefaultPath = @"C:\Program Files (x86)\gnuplot\bin\gnuplot.exe";
+        private const string gnuPlotDefaultPath = @"C:\Program Files\gnuplot\bin\gnuplot.exe";
+        private const string gnuPlotDefaultPath2 = @"C:\Program Files (x86)\gnuplot\bin\gnuplot.exe";
         string gnuPlotPath;
 
         public MainWindow()
@@ -1365,6 +1366,11 @@ namespace MightyWatt
                         // gnuplot is in default location
                         gnuPlotPath = gnuPlotDefaultPath;
                     }
+                    else if (System.IO.File.Exists(gnuPlotDefaultPath2))
+                    {
+                        // gnuplot is in the second default location
+                        gnuPlotPath = gnuPlotDefaultPath2;
+                    }
                     else if (System.IO.File.Exists("gnuplotpath.txt"))
                     {
                         // gnuplot folder is referenced in gnuplotpath file
@@ -1417,7 +1423,8 @@ namespace MightyWatt
 
                     if (System.IO.File.Exists(gnuPlotPath))
                     {      
-                        if (gnuPlotPath != gnuPlotDefaultPath)
+                        if (gnuPlotPath != gnuPlotDefaultPath &&
+                            gnuPlotPath != gnuPlotDefaultPath2)
                         {
                             // save file path if not in the default location
 
