@@ -67,6 +67,7 @@ namespace MightyWatt
                 //sb.Append(".");
                 //sb.AppendFormat("{0:000}", now.Millisecond);
                 file.WriteLine(sb.ToString());
+                PeriodicFlush();
             } 
         }
 
@@ -75,13 +76,7 @@ namespace MightyWatt
             if (!string.IsNullOrEmpty(FilePath))
             {
                 file.WriteLine(line);
-
-                // Flush to file
-                if ((DateTime.Now - lastFlush).TotalSeconds > flushPeriod)
-                {
-                    lastFlush = DateTime.Now;
-                    file.Flush();
-                }
+                PeriodicFlush();
             }
         }
 
@@ -90,6 +85,20 @@ namespace MightyWatt
         {
             if (!string.IsNullOrEmpty(FilePath))
             {
+                file.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Manages periodic flushing of file to disk
+        /// </summary>
+        private void PeriodicFlush()
+        {
+            // Flush to file
+            DateTime now = DateTime.Now;
+            if ((now - lastFlush).TotalSeconds > flushPeriod)
+            {
+                lastFlush = now;
                 file.Flush();
             }
         }
